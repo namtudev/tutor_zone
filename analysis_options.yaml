@@ -1,0 +1,49 @@
+include: package:lint/strict.yaml
+
+analyzer:
+  plugins:
+    - custom_lint
+  exclude:
+    - build/**
+    - lib/features/appsync/domain/entities/generated/**
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+  errors:
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    # Make constructors the first thing in every class
+    sort_constructors_first: true
+
+    # The new tabs vs. spaces. Choose wisely
+    prefer_single_quotes: true
+
+    # Good packages document everything
+    public_member_api_docs: false
+
+    # Low value and high cost to change on all files
+    eol_at_end_of_file: false
+
+    # Blindly follow the Flutter code style, which prefers types everywhere
+    always_specify_types: false
+
+    # Use parameter order as in json response
+    always_put_required_named_parameters_first: false
+
+    # Util classes are awesome!
+    avoid_classes_with_only_static_members: false
+
+    # Turn off linter when line is longer than 80 characters
+    lines_longer_than_80_chars: false
+
+    omit_local_variable_types: true
+
+    sort_pub_dependencies: false
+
+    unnecessary_underscores: true
+
+    use_setters_to_change_properties: false
+
+formatter:
+  page_width: 160
