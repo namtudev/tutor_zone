@@ -3,14 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
-import 'package:tutor_zone/features/dashboard/screens/dashboard_screen.dart';
-import 'package:tutor_zone/features/home/screens/main_shell_screen.dart';
-import 'package:tutor_zone/features/payments/screens/payments_screen.dart';
-import 'package:tutor_zone/features/reports/screens/monthly_summary_screen.dart';
-import 'package:tutor_zone/features/settings/screens/settings_screen.dart';
-import 'package:tutor_zone/features/students/screens/student_profile_screen.dart';
-import 'package:tutor_zone/features/students/screens/students_list_screen.dart';
-import 'package:tutor_zone/features/timer/screens/session_timer_screen.dart';
+import 'package:tutor_zone/features/dashboard/views/screens/dashboard_screen.dart';
+import 'package:tutor_zone/features/home/views/screens/main_shell_screen.dart';
+import 'package:tutor_zone/features/payments/views/screens/payments_screen.dart';
+import 'package:tutor_zone/features/reports/views/screens/monthly_summary_screen.dart';
+import 'package:tutor_zone/features/settings/views/screens/settings_screen.dart';
+import 'package:tutor_zone/features/students/views/screens/student_profile_screen.dart';
+import 'package:tutor_zone/features/students/views/screens/students_list_screen.dart';
+import 'package:tutor_zone/features/timer/views/screens/session_timer_screen.dart';
 import 'package:tutor_zone/router/route_config.dart';
 import 'package:tutor_zone/router/router_listenable.dart';
 
@@ -95,14 +95,15 @@ GoRouter router(Ref ref) {
       // Main shell route with bottom navigation
       StatefulShellRoute.indexedStack(
         // Builder for the shell scaffold with navigation
-        builder: (
-          BuildContext context,
-          GoRouterState state,
-          StatefulNavigationShell navigationShell,
-        ) {
-          // Return the main shell screen with the navigation shell
-          return MainShellScreen(navigationShell: navigationShell);
-        },
+        builder:
+            (
+              BuildContext context,
+              GoRouterState state,
+              StatefulNavigationShell navigationShell,
+            ) {
+              // Return the main shell screen with the navigation shell
+              return MainShellScreen(navigationShell: navigationShell);
+            },
 
         // Define navigation branches (one per tab)
         branches: [
