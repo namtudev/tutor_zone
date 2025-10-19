@@ -1,7 +1,11 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tutor_zone/config/firebase_options_dev.dart' as firebase_dev;
+import 'package:tutor_zone/config/firebase_options_prod.dart' as firebase_prod;
+import 'package:tutor_zone/config/firebase_options_staging.dart' as firebase_staging;
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/flavors.dart';
 
@@ -36,6 +40,9 @@ Future<void> _initializeApp(FlavorConfig flavorConfig) async {
   try {
     logInfo('📝 Initializing app with flavor: ${flavorConfig.flavor.name}');
 
+    // Initialize Firebase with flavor-specific configuration
+    await _initializeFirebase(flavorConfig.flavor);
+
     // Log flavor configuration
     if (flavorConfig.enableLogging) {
       logInfo('✓ Debug logging enabled');
@@ -56,6 +63,32 @@ Future<void> _initializeApp(FlavorConfig flavorConfig) async {
     logInfo('✅ Application initialization complete');
   } catch (e, stackTrace) {
     logError('❌ Error during app initialization', e, stackTrace);
+    rethrow;
+  }
+}
+
+/// Initialize Firebase with the correct configuration based on flavor
+Future<void> _initializeFirebase(Flavor flavor) async {
+  try {
+    logInfo('🔥 Initializing Firebase for ${flavor.name} environment...');
+
+    // Select the appropriate Firebase options based on flavor
+    final FirebaseOptions firebaseOptions;
+    switch (flavor) {
+      case Flavor.dev:
+        firebaseOptions = firebase_dev.DefaultFirebaseOptions.currentPlatform;
+      case Flavor.staging:
+        firebaseOptions = firebase_staging.DefaultFirebaseOptions.currentPlatform;
+      case Flavor.prod:
+        firebaseOptions = firebase_prod.DefaultFirebaseOptions.currentPlatform;
+    }
+
+    // Initialize Firebase
+    await Firebase.initializeApp(options: firebaseOptions);
+
+    logInfo('✅ Firebase initialized successfully (${firebaseOptions.projectId})');
+  } catch (e, stackTrace) {
+    logError('❌ Error initializing Firebase', e, stackTrace);
     rethrow;
   }
 }
