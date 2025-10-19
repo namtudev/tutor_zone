@@ -17,8 +17,7 @@ CLAUDE.md
 .claude/
 
 # Documentation
-doc/
-/doc/
+.doc_gen/
 
 # IntelliJ related
 *.iml
