@@ -1,0 +1,179 @@
+Here's a summary of the key breaking changes and how to migrate your code when updating from Riverpod 2.0 to 3.0.
+
+-----
+
+### Automatic Retry is Now Default
+
+Providers that fail will now automatically retry by default.
+
+  * **To disable globally:** Set the `retry` parameter in your `ProviderScope` to return `null`.
+    ```dart
+    ProviderScope(
+      // Never retry any provider
+      retry: (retryCount, error) => null,
+      child: MyApp(),
+    )
+    ```
+  * **To disable per-provider:** Use the `@Riverpod(retry: ...)` annotation and provide a function that returns `null`.
+    ```dart
+    // Never retry this specific provider
+    Duration? retry(int retryCount, Object error) => null;
+
+    @Riverpod(retry: retry)
+    class TodoList extends _$TodoList {
+      // ...
+    }
+    ```
+
+-----
+
+### Out-of-View Providers are Paused
+
+Providers are now paused by default when not in view. To disable this for certain widgets, wrap them in a `TickerMode` widget.
+
+```dart
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return TickerMode(
+      enabled: true, // Prevents pausing for descendant listeners
+      child: Consumer(
+        builder: (context, ref, child) {
+          final value = ref.watch(myProvider);
+          return Text(value.toString());
+        },
+      ),
+    );
+  }
+}
+```
+
+-----
+
+### Legacy Providers Moved
+
+`StateProvider`, `StateNotifierProvider`, and `ChangeNotifierProvider` are now considered legacy and have been moved. Update your imports to continue using them:
+
+```dart
+import 'package:flutter_riverpod/legacy.dart';
+// or 'package:hooks_riverpod/legacy.dart';
+// or 'package:riverpod/legacy.dart';
+```
+
+-----
+
+### Universal `==` Filtering
+
+All providers now use `==` to filter updates, which might affect `StreamProvider`. To customize this behavior, refactor your provider to a `Notifier` (e.g., `StreamNotifier`) and override `updateShouldNotify`.
+
+```dart
+@riverpod
+class TodoList extends _$TodoList {
+  @override
+  Stream<Todo> build() => Stream(...);
+
+  @override
+  bool updateShouldNotify(AsyncValue<Todo> previous, AsyncValue<Todo> next) {
+    // Return true to always notify, or add custom logic
+    return true;
+  }
+}
+```
+
+-----
+
+### `ProviderObserver` Interface Change
+
+The `ProviderObserver` methods now pass a single `ProviderObserverContext` object instead of separate parameters.
+
+  * **Before:**
+    ```dart
+    void didAddProvider(ProviderBase provider, Object? value, ProviderContainer container)
+    ```
+  * **After:**
+    ```dart
+    void didAddProvider(ProviderObserverContext context, Object? value)
+    ```
+
+-----
+
+### Simplified `Ref`
+
+The `Ref` class no longer has a type parameter, and its subclasses (e.g., `FutureProviderRef`, `MyProviderRef`) have been removed.
+
+  * Methods like `listenSelf` and properties like `state` and `future` are now accessed directly on the `Notifier` class instance, not on `ref`.
+
+  * In provider definitions, replace specific `Ref` types like `ExampleRef` with the generic `Ref`.
+
+  * **Before:**
+
+    ```dart
+    @riverpod
+    int example(ExampleRef ref) { /* ... */ }
+    ```
+
+  * **After:**
+
+    ```dart
+    @riverpod
+    int example(Ref ref) { /* ... */ }
+    ```
+
+-----
+
+### `AutoDispose` and `FamilyNotifier` Interfaces Removed
+
+The API has been simplified by removing `AutoDispose` and `Family` variants.
+
+  * **For AutoDispose:** Perform a case-sensitive search and replace of `AutoDispose` with an empty string.
+
+  * **For FamilyNotifiers:**
+
+    1.  Rename `FamilyNotifier`, `FamilyAsyncNotifier`, etc., to `Notifier`, `AsyncNotifier`, etc.
+    2.  Move the family parameter from the `build` method to the class constructor.
+
+  * **Before:**
+
+    ```dart
+    class CounterNotifier extends FamilyNotifier<int, String> {
+      @override
+      int build(String arg) { /* ... */ }
+    }
+    ```
+
+  * **After:**
+
+    ```dart
+    class CounterNotifier extends Notifier<int> {
+      CounterNotifier(this.arg);
+      final String arg;
+
+      @override
+      int build() { /* Use this.arg */ }
+    }
+    ```
+
+-----
+
+### Provider Failures Rethrown as `ProviderException`
+
+Errors from providers are now wrapped in a `ProviderException`. Update your `try/catch` blocks to handle this. Code using `AsyncValue.error` does not need to be changed.
+
+  * **Before:**
+    ```dart
+    try {
+      await ref.read(myProvider.future);
+    } on NotFoundException {
+      // Handle NotFoundException
+    }
+    ```
+  * **After:**
+    ```dart
+    try {
+      await ref.read(myProvider.future);
+    } on ProviderException catch (e) {
+      if (e.exception is NotFoundException) {
+        // Handle NotFoundException
+      }
+    }
+    ```
