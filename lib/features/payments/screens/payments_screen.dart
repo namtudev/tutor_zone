@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 class PaymentsScreen extends StatelessWidget {
   const PaymentsScreen({super.key});
 
+  /// Route name for navigation
+  static const String routeName = 'payments';
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

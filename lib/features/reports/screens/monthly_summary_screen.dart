@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 class MonthlySummaryScreen extends StatelessWidget {
   const MonthlySummaryScreen({super.key});
 
+  /// Route name for navigation
+  static const String routeName = 'reports';
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

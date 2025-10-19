@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 class SessionTimerScreen extends StatelessWidget {
   const SessionTimerScreen({super.key});
 
+  /// Route name for navigation
+  static const String routeName = 'timer';
+
   @override
   Widget build(BuildContext context) {
     // Simulate timer running state

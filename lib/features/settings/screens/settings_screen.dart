@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  /// Route name for navigation
+  static const String routeName = 'settings';
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

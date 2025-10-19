@@ -18,6 +18,8 @@ CLAUDE.md
 # Documentation
 @doc/
 @doc/**/*
+@doc/**
+@doc/*
 
 # IntelliJ related
 *.iml

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 class StudentsListScreen extends StatelessWidget {
   const StudentsListScreen({super.key});
 
+  /// Route name for navigation
+  static const String routeName = 'students';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

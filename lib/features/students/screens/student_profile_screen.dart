@@ -2,7 +2,16 @@ import 'package:flutter/material.dart';
 
 /// Student profile screen showing details and session history
 class StudentProfileScreen extends StatelessWidget {
-  const StudentProfileScreen({super.key});
+  const StudentProfileScreen({
+    required this.studentId,
+    super.key,
+  });
+
+  /// Route name for navigation
+  static const String routeName = 'student-profile';
+
+  /// Student ID from route parameters
+  final String studentId;
 
   @override
   Widget build(BuildContext context) {
