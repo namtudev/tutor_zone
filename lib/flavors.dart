@@ -1,20 +1,10 @@
 /// Flavor enumeration for development, staging, and production environments
-enum Flavor {
-  dev,
-  staging,
-  prod,
-}
+enum Flavor { dev, staging, prod }
 
 /// Flavor configuration class
 /// Stores environment-specific settings for API endpoints, logging, analytics, and app name.
 class FlavorConfig {
-  const FlavorConfig({
-    required this.flavor,
-    required this.apiBaseUrl,
-    required this.enableLogging,
-    required this.enableAnalytics,
-    required this.appName,
-  });
+  const FlavorConfig({required this.flavor, required this.apiBaseUrl, required this.enableLogging, required this.enableAnalytics, required this.appName});
 
   /// Development flavor configuration
   static const FlavorConfig dev = FlavorConfig(

@@ -14,7 +14,8 @@ analyzer:
 linter:
   rules:
     # Make constructors the first thing in every class
-    sort_constructors_first: true
+    sort_constructors_first: false
+    sort_unnamed_constructors_first: false
 
     # The new tabs vs. spaces. Choose wisely
     prefer_single_quotes: true
@@ -47,3 +48,5 @@ linter:
 
 formatter:
   page_width: 160
+  trailing_commas: preserve
+

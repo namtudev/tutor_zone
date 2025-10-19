@@ -14,10 +14,13 @@ migrate_working_dir/
 
 # Claude Code
 CLAUDE.md
+.claude/
 
 # Documentation
 @doc/
 @doc/**/*
+@doc/**
+@doc/*
 
 # IntelliJ related
 *.iml
@@ -40,6 +43,11 @@ CLAUDE.md
 /build/
 /coverage/
 
+# Generated files (build_runner, freezed, riverpod_generator, etc.)
+*.g.dart
+*.freezed.dart
+*.config.dart
+
 # Symbolication related
 app.*.symbols
 
@@ -50,3 +58,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/doc/

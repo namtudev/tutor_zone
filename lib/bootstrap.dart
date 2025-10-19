@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/flavors.dart';
 
@@ -9,10 +9,7 @@ import 'package:tutor_zone/flavors.dart';
 /// Ensures that Flutter widgets are initialized, sets the flavor,
 /// initializes logging, and creates a ProviderContainer for state management.
 /// Returns a ProviderContainer which is used to manage the state of the application.
-Future<ProviderContainer> bootstrap({
-  required FlavorConfig flavorConfig,
-  required Widget Function() appBuilder,
-}) async {
+Future<ProviderContainer> bootstrap({required FlavorConfig flavorConfig, required Widget Function() appBuilder}) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Set the current flavor
@@ -26,9 +23,7 @@ Future<ProviderContainer> bootstrap({
   await _initializeApp(flavorConfig);
 
   // Create a ProviderContainer with error logging
-  final container = ProviderContainer(
-    observers: <ProviderObserver>[const _ErrorLogger()],
-  );
+  final container = ProviderContainer(observers: <ProviderObserver>[const _ErrorLogger()]);
 
   // Initialize providers
   await _initProviders(container, flavorConfig);
@@ -66,10 +61,7 @@ Future<void> _initializeApp(FlavorConfig flavorConfig) async {
 }
 
 /// Initialize providers
-Future<void> _initProviders(
-  ProviderContainer container,
-  FlavorConfig flavorConfig,
-) async {
+Future<void> _initProviders(ProviderContainer container, FlavorConfig flavorConfig) async {
   try {
     // Initialize any required providers here
     // Example:
@@ -89,30 +81,14 @@ base class _ErrorLogger extends ProviderObserver {
   const _ErrorLogger();
 
   @override
-  void didUpdateProvider(
-    ProviderObserverContext context,
-    Object? previousValue,
-    Object? newValue,
-  ) {
+  void didUpdateProvider(ProviderObserverContext context, Object? previousValue, Object? newValue) {
     if (newValue.runtimeType.toString().startsWith('AsyncError')) {
-      logError(
-        '[${context.provider.name}] Provider error',
-        newValue,
-        StackTrace.current,
-      );
+      logError('[${context.provider.name}] Provider error', newValue, StackTrace.current);
     }
   }
 
   @override
-  void providerDidFail(
-    ProviderObserverContext context,
-    Object error,
-    StackTrace stackTrace,
-  ) {
-    logError(
-      '[${context.provider.name ?? context.provider.runtimeType}] Provider failed',
-      error,
-      stackTrace,
-    );
+  void providerDidFail(ProviderObserverContext context, Object error, StackTrace stackTrace) {
+    logError('[${context.provider.name ?? context.provider.runtimeType}] Provider failed', error, stackTrace);
   }
 }
