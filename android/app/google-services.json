@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "421970184365",
+    "project_id": "tutor-zone-996b0",
+    "storage_bucket": "tutor-zone-996b0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:421970184365:android:2371538b195d8ba4cf1e24",
+        "android_client_info": {
+          "package_name": "com.example.tutor_zone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7U3Ya6vg7C3QhxTsJdWTEFTaEZi0ztXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

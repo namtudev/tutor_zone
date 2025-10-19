@@ -44,6 +44,8 @@ dependencies:
   flutter_animate: ^4.5.2
   talker_riverpod_logger: ^5.0.2
   flutter_riverpod: ^3.0.3
+  firebase_auth: ^6.1.1
+  firebase_core: ^4.2.0
 
 dev_dependencies:
   flutter_test:
