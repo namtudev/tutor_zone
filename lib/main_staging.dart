@@ -7,14 +7,6 @@ import 'package:tutor_zone/flavors.dart';
 /// Staging flavor entry point
 Future<void> main() async {
   F.appFlavor = Flavor.staging;
-  final container = await bootstrap(
-    flavorConfig: FlavorConfig.staging,
-    appBuilder: () => const App(),
-  );
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const App(),
-    ),
-  );
+  final container = await bootstrap(flavorConfig: FlavorConfig.staging, appBuilder: () => const App());
+  runApp(UncontrolledProviderScope(container: container, child: const App()));
 }

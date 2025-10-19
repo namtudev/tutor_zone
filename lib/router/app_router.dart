@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/features/home/screens/main_shell_screen.dart';
 
 /// Route names for type-safe navigation
 class RoutePath {
@@ -16,7 +17,7 @@ final GoRouter appRouter = GoRouter(
   initialLocation: RoutePath.home,
   debugLogDiagnostics: true,
   observers: [_LoggingNavigatorObserver()],
-  routes: [GoRoute(path: RoutePath.home, name: 'home', builder: (context, state) => const HomeScreen())],
+  routes: [GoRoute(path: RoutePath.home, name: 'home', builder: (context, state) => const MainShellScreen())],
   errorBuilder: (context, state) => const NotFoundScreen(),
 );
 
@@ -40,19 +41,6 @@ class _LoggingNavigatorObserver extends NavigatorObserver {
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
     logInfo('Replaced ${oldRoute?.settings.name} with ${newRoute?.settings.name}');
-  }
-}
-
-/// Placeholder home screen
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Tutor Zone')),
-      body: const Center(child: Text('Welcome to Tutor Zone')),
-    );
   }
 }
 
