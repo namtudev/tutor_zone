@@ -6,6 +6,29 @@ A Flutter application for tutors to manage students, track teaching sessions, an
 
 TutorZone helps tutors organize their teaching business by tracking student information, logging sessions, calculating earnings, and managing payments — all in one place.
 
+### App Preview
+
+<table>
+  <tr>
+    <td width="25%">
+      <img src="screenshots/dashboard.png" alt="Dashboard" />
+      <p align="center"><b>Dashboard</b><br/>Track earnings, hours, and upcoming sessions</p>
+    </td>
+    <td width="25%">
+      <img src="screenshots/students.png" alt="Students" />
+      <p align="center"><b>Students</b><br/>Manage student profiles and balances</p>
+    </td>
+    <td width="25%">
+      <img src="screenshots/timer.png" alt="Timer" />
+      <p align="center"><b>Timer</b><br/>Track sessions with built-in timer</p>
+    </td>
+    <td width="25%">
+      <img src="screenshots/payment.png" alt="Payments" />
+      <p align="center"><b>Payments</b><br/>Monitor payments and student balances</p>
+    </td>
+  </tr>
+</table>
+
 ## Core Features (MVP – Minimum Viable Product)
 
 ### 1. Student Management
