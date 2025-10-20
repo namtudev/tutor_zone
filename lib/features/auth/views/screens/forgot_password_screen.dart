@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
+import 'package:tutor_zone/features/auth/utils/auth_validators.dart';
 import 'package:tutor_zone/features/auth/views/widgets/auth_button.dart';
 import 'package:tutor_zone/features/auth/views/widgets/auth_text_field.dart';
 
@@ -60,16 +61,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     }
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required';
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Enter a valid email address';
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +127,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             labelText: 'Email',
             hintText: 'Enter your email',
             keyboardType: TextInputType.emailAddress,
-            validator: _validateEmail,
+            validator: AuthValidators.validateEmail,
             enabled: !_isLoading,
             autofillHints: const [AutofillHints.email],
             textInputAction: TextInputAction.done,

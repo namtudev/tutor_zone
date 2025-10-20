@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
+import 'package:tutor_zone/features/auth/utils/auth_validators.dart';
 import 'package:tutor_zone/features/auth/views/widgets/auth_button.dart';
 import 'package:tutor_zone/features/auth/views/widgets/auth_divider.dart';
 import 'package:tutor_zone/features/auth/views/widgets/auth_text_field.dart';
@@ -68,26 +69,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required';
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Enter a valid email address';
-    }
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password is required';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +115,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       labelText: 'Email',
                       hintText: 'Enter your email',
                       keyboardType: TextInputType.emailAddress,
-                      validator: _validateEmail,
+                      validator: AuthValidators.validateEmail,
                       enabled: !_isLoading,
                       autofillHints: const [AutofillHints.email],
                       textInputAction: TextInputAction.next,
@@ -147,7 +128,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       labelText: 'Password',
                       hintText: 'Enter your password',
                       isPassword: true,
-                      validator: _validatePassword,
+                      validator: AuthValidators.validatePassword,
                       enabled: !_isLoading,
                       autofillHints: const [AutofillHints.password],
                       textInputAction: TextInputAction.done,
