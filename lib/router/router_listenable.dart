@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
+import 'package:tutor_zone/features/auth/views/ui_states/auth_state.dart';
+import 'package:tutor_zone/router/route_config.dart';
 
 part 'router_listenable.g.dart';
 
@@ -25,15 +28,23 @@ class RouterListenable extends _$RouterListenable implements Listenable {
       _routeListener?.call();
     });
 
-    // TODO: Add listeners for authentication state changes
-    // Example:
-    // ref.listen(authStateProvider, (previous, next) {
-    //   logInfo('Auth state changed: ${next.isAuthenticated}');
-    //   // Trigger router refresh
-    // });
+    // Listen to authentication state changes
+    ref.listen(authControllerProvider, (previous, next) {
+      logInfo('Auth state changed in router: ${_getAuthStateDescription(next)}');
+      // Trigger router refresh when auth state changes
+      _routeListener?.call();
+    });
+  }
 
-    // TODO: Add listeners for other global state that affects routing
-    // Example: feature flags, user preferences, etc.
+  /// Get description of auth state for logging
+  String _getAuthStateDescription(AuthState state) {
+    return switch (state) {
+      Authenticated(:final user) => 'Authenticated: ${user.email}',
+      Unauthenticated() => 'Unauthenticated',
+      Loading() => 'Loading',
+      Initial() => 'Initial',
+      Error(:final message) => 'Error: $message',
+    };
   }
 
   /// Redirect logic for handling protected routes
@@ -45,26 +56,49 @@ class RouterListenable extends _$RouterListenable implements Listenable {
   String? redirect(String location) {
     logDebug('Router redirect check for location: $location');
 
-    // TODO: Implement authentication checks
-    // Example:
-    // final isAuthenticated = ref.read(authStateProvider).isAuthenticated;
-    // if (!isAuthenticated && _requiresAuth(location)) {
-    //   return '/login';
-    // }
+    final authState = ref.read(authControllerProvider);
+    final isAuthenticated = switch (authState) {
+      Authenticated() => true,
+      _ => false,
+    };
+
+    final isAuthRoute = _isAuthRoute(location);
+    final requiresAuth = _requiresAuth(location);
+
+    logDebug('Location: $location, isAuth: $isAuthenticated, '
+        'isAuthRoute: $isAuthRoute, requiresAuth: $requiresAuth');
+
+    // If user is authenticated and trying to access auth routes, redirect to dashboard
+    if (isAuthenticated && isAuthRoute) {
+      logInfo('Authenticated user accessing auth route, redirecting to dashboard');
+      return Routes.dashboard.path;
+    }
+
+    // If user is not authenticated and trying to access protected route, redirect to sign in
+    if (!isAuthenticated && requiresAuth) {
+      logInfo('Unauthenticated user accessing protected route, redirecting to sign in');
+      return Routes.signIn.path;
+    }
 
     // No redirect needed
     return null;
+  }
+
+  /// Check if a route is an authentication route
+  bool _isAuthRoute(String location) {
+    return location == Routes.signIn.path ||
+        location == Routes.forgotPassword.path;
   }
 
   /// Check if a route requires authentication
   ///
   /// This can be used in redirect logic to protect authenticated routes
   bool _requiresAuth(String location) {
-    // TODO: Implement based on route configuration
-    // Example:
-    // return RouteGroups.authenticatedRoutes
-    //     .any((route) => location.startsWith(route.path));
-    return false;
+    // Check if location matches any authenticated route
+    return RouteGroups.authenticatedRoutes.any((route) {
+      // Handle both exact matches and path prefixes
+      return location == route.path || location.startsWith('${route.path}/');
+    });
   }
 
   /// Refresh the router

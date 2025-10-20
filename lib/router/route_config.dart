@@ -48,46 +48,78 @@ abstract class AppRoute with _$AppRoute {
 class Routes {
   Routes._();
 
+  // ==================== Auth ====================
+  static const signIn = AppRoute(
+    name: 'sign-in',
+    path: '/sign-in',
+    requiresAuth: false,
+  );
+
+  static const signUp = AppRoute(
+    name: 'sign-up',
+    path: '/sign-up',
+    requiresAuth: false,
+  );
+
+  static const forgotPassword = AppRoute(
+    name: 'forgot-password',
+    path: '/forgot-password',
+    requiresAuth: false,
+  );
+
+  static const profile = AppRoute(
+    name: 'profile',
+    path: '/profile',
+    requiresAuth: true,
+  );
+
   // ==================== Dashboard ====================
   static const dashboard = AppRoute(
     name: 'dashboard',
     path: '/dashboard',
+    requiresAuth: true,
   );
 
   // ==================== Students ====================
   static const students = AppRoute(
     name: 'students',
     path: '/students',
+    requiresAuth: true,
   );
 
   static const studentProfile = AppRoute(
     name: 'student-profile',
     path: ':id', // Relative path under /students
     pathParameters: IListConst(['id']),
+    requiresAuth: true,
   );
 
   // ==================== Timer ====================
   static const timer = AppRoute(
     name: 'timer',
     path: '/timer',
+    requiresAuth: true,
   );
 
   // ==================== Payments ====================
   static const payments = AppRoute(
     name: 'payments',
     path: '/payments',
+    requiresAuth: true,
   );
 
   // ==================== Reports ====================
   static const reports = AppRoute(
     name: 'reports',
     path: '/reports',
+    requiresAuth: true,
   );
 
   // ==================== Settings ====================
   static const settings = AppRoute(
     name: 'settings',
     path: '/settings',
+    requiresAuth: true,
   );
 
   // ==================== Error ====================
@@ -98,6 +130,10 @@ class Routes {
 
   /// All routes as an immutable list
   static final all = IList<AppRoute>(const [
+    signIn,
+    signUp,
+    forgotPassword,
+    profile,
     dashboard,
     students,
     studentProfile,

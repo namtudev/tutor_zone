@@ -25,7 +25,10 @@ class App extends ConsumerWidget {
       routerConfig: router,
       // Show Talker logging UI in debug mode
       builder: (context, child) {
-        return TalkerWrapper(talker: getTalkerInstance(), child: child ?? const SizedBox.shrink());
+        return TalkerWrapper(
+          talker: getTalkerInstance(),
+          child: child ?? const SizedBox.shrink(),
+        );
       },
     );
   }
