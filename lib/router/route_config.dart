@@ -28,7 +28,7 @@ abstract class AppRoute with _$AppRoute {
     @Default(IListConst([])) IList<String> queryParameters,
 
     /// Whether this route requires authentication
-    @Default(false) bool requiresAuth,
+    @Default(true) bool requiresAuth,
   }) = _AppRoute;
 
   /// Build path with parameter substitution
@@ -47,6 +47,30 @@ abstract class AppRoute with _$AppRoute {
 /// Organized by feature and navigation hierarchy
 class Routes {
   Routes._();
+
+  // ==================== Auth ====================
+  static const signIn = AppRoute(
+    name: 'sign-in',
+    path: '/sign-in',
+    requiresAuth: false,
+  );
+
+  static const signUp = AppRoute(
+    name: 'sign-up',
+    path: '/sign-up',
+    requiresAuth: false,
+  );
+
+  static const forgotPassword = AppRoute(
+    name: 'forgot-password',
+    path: '/forgot-password',
+    requiresAuth: false,
+  );
+
+  static const profile = AppRoute(
+    name: 'profile',
+    path: '/profile',
+  );
 
   // ==================== Dashboard ====================
   static const dashboard = AppRoute(
@@ -94,10 +118,15 @@ class Routes {
   static const notFound = AppRoute(
     name: 'not-found',
     path: '/404',
+    requiresAuth: false,
   );
 
   /// All routes as an immutable list
   static final all = IList<AppRoute>(const [
+    signIn,
+    signUp,
+    forgotPassword,
+    profile,
     dashboard,
     students,
     studentProfile,

@@ -3,6 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/features/auth/views/screens/forgot_password_screen.dart';
+import 'package:tutor_zone/features/auth/views/screens/profile_screen.dart';
+import 'package:tutor_zone/features/auth/views/screens/sign_in_screen.dart';
+import 'package:tutor_zone/features/auth/views/screens/sign_up_screen.dart';
 import 'package:tutor_zone/features/dashboard/views/screens/dashboard_screen.dart';
 import 'package:tutor_zone/features/home/views/screens/main_shell_screen.dart';
 import 'package:tutor_zone/features/payments/views/screens/payments_screen.dart';
@@ -63,7 +67,7 @@ final _settingsNavKey = GlobalKey<NavigatorState>(
 /// - Type-safe routing with named routes
 /// - Nested navigation for detail screens
 /// - Talker logging for debugging
-@Riverpod(keepAlive: true)
+@riverpod
 GoRouter router(Ref ref) {
   final routerNotifier = ref.watch(routerListenableProvider.notifier);
 
@@ -71,8 +75,8 @@ GoRouter router(Ref ref) {
     // Global navigator key
     navigatorKey: _rootNavigatorKey,
 
-    // Start at dashboard
-    initialLocation: Routes.dashboard.path,
+    // Start at sign in (redirect will handle auth)
+    initialLocation: Routes.signIn.path,
 
     // Enable debug logging in debug mode
     debugLogDiagnostics: true,
@@ -92,6 +96,40 @@ GoRouter router(Ref ref) {
 
     // Route configuration
     routes: [
+      // ==================== Auth Routes ====================
+      GoRoute(
+        path: Routes.signIn.path,
+        name: Routes.signIn.name,
+        pageBuilder: (context, state) => NoTransitionPage(
+          key: state.pageKey,
+          child: const SignInScreen(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.signUp.path,
+        name: Routes.signUp.name,
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const SignUpScreen(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.forgotPassword.path,
+        name: Routes.forgotPassword.name,
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const ForgotPasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.profile.path,
+        name: Routes.profile.name,
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const ProfileScreen(),
+        ),
+      ),
+
       // Main shell route with bottom navigation
       StatefulShellRoute.indexedStack(
         // Builder for the shell scaffold with navigation
