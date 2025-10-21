@@ -67,7 +67,7 @@ final _settingsNavKey = GlobalKey<NavigatorState>(
 /// - Type-safe routing with named routes
 /// - Nested navigation for detail screens
 /// - Talker logging for debugging
-@Riverpod(keepAlive: true)
+@riverpod
 GoRouter router(Ref ref) {
   final routerNotifier = ref.watch(routerListenableProvider.notifier);
 

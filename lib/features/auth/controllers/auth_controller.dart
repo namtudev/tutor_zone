@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
-import 'package:tutor_zone/features/auth/models/data/auth_user.dart';
 import 'package:tutor_zone/features/auth/models/repositories/auth_repository.dart';
 import 'package:tutor_zone/features/auth/views/ui_states/auth_state.dart';
 
@@ -63,7 +62,6 @@ class AuthController extends _$AuthController {
     } catch (e, stackTrace) {
       state = AuthState.error(e.toString());
       logError('AuthController: Sign in failed', e, stackTrace);
-      rethrow;
     }
   }
 
@@ -84,7 +82,6 @@ class AuthController extends _$AuthController {
     } catch (e, stackTrace) {
       state = AuthState.error(e.toString());
       logError('AuthController: User creation failed', e, stackTrace);
-      rethrow;
     }
   }
 
@@ -99,7 +96,6 @@ class AuthController extends _$AuthController {
     } catch (e, stackTrace) {
       state = AuthState.error(e.toString());
       logError('AuthController: Sign out failed', e, stackTrace);
-      rethrow;
     }
   }
 
@@ -111,7 +107,6 @@ class AuthController extends _$AuthController {
       logInfo('AuthController: Password reset email sent - $email');
     } catch (e, stackTrace) {
       logError('AuthController: Password reset email failed', e, stackTrace);
-      rethrow;
     }
   }
 
@@ -123,7 +118,6 @@ class AuthController extends _$AuthController {
       logInfo('AuthController: Email verification sent');
     } catch (e, stackTrace) {
       logError('AuthController: Email verification failed', e, stackTrace);
-      rethrow;
     }
   }
 
@@ -141,7 +135,6 @@ class AuthController extends _$AuthController {
       }
     } catch (e, stackTrace) {
       logError('AuthController: Display name update failed', e, stackTrace);
-      rethrow;
     }
   }
 
@@ -154,23 +147,6 @@ class AuthController extends _$AuthController {
       logInfo('AuthController: User account deleted');
     } catch (e, stackTrace) {
       logError('AuthController: User deletion failed', e, stackTrace);
-      rethrow;
     }
-  }
-
-  /// Check if user is authenticated
-  bool get isAuthenticated {
-    return switch (state) {
-      Authenticated() => true,
-      _ => false,
-    };
-  }
-
-  /// Get authenticated user (if any)
-  AuthUser? get user {
-    return switch (state) {
-      Authenticated(:final user) => user,
-      _ => null,
-    };
   }
 }

@@ -6,17 +6,15 @@ import 'package:flutter/material.dart';
 /// Uses GoogleProvider from firebase_ui_oauth_google
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({
-    required this.clientId,
     super.key,
   });
 
-  final String clientId;
 
   @override
   Widget build(BuildContext context) {
     return OAuthProviderButton(
       provider: GoogleProvider(
-        clientId: clientId,
+        clientId: '', // TODO set web client ID for linux/windows
       ),
     );
   }

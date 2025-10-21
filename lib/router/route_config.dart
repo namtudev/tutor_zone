@@ -28,7 +28,7 @@ abstract class AppRoute with _$AppRoute {
     @Default(IListConst([])) IList<String> queryParameters,
 
     /// Whether this route requires authentication
-    @Default(false) bool requiresAuth,
+    @Default(true) bool requiresAuth,
   }) = _AppRoute;
 
   /// Build path with parameter substitution
@@ -70,62 +70,55 @@ class Routes {
   static const profile = AppRoute(
     name: 'profile',
     path: '/profile',
-    requiresAuth: true,
   );
 
   // ==================== Dashboard ====================
   static const dashboard = AppRoute(
     name: 'dashboard',
     path: '/dashboard',
-    requiresAuth: true,
   );
 
   // ==================== Students ====================
   static const students = AppRoute(
     name: 'students',
     path: '/students',
-    requiresAuth: true,
   );
 
   static const studentProfile = AppRoute(
     name: 'student-profile',
     path: ':id', // Relative path under /students
     pathParameters: IListConst(['id']),
-    requiresAuth: true,
   );
 
   // ==================== Timer ====================
   static const timer = AppRoute(
     name: 'timer',
     path: '/timer',
-    requiresAuth: true,
   );
 
   // ==================== Payments ====================
   static const payments = AppRoute(
     name: 'payments',
     path: '/payments',
-    requiresAuth: true,
   );
 
   // ==================== Reports ====================
   static const reports = AppRoute(
     name: 'reports',
     path: '/reports',
-    requiresAuth: true,
   );
 
   // ==================== Settings ====================
   static const settings = AppRoute(
     name: 'settings',
     path: '/settings',
-    requiresAuth: true,
   );
 
   // ==================== Error ====================
   static const notFound = AppRoute(
     name: 'not-found',
     path: '/404',
+    requiresAuth: false,
   );
 
   /// All routes as an immutable list

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
 import 'package:tutor_zone/features/auth/utils/auth_validators.dart';
+import 'package:tutor_zone/features/auth/views/ui_states/auth_state.dart';
 import 'package:tutor_zone/features/auth/views/widgets/auth_button.dart';
 import 'package:tutor_zone/features/auth/views/widgets/auth_divider.dart';
 import 'package:tutor_zone/features/auth/views/widgets/auth_text_field.dart';
@@ -22,7 +22,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -36,42 +35,51 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
-
-    try {
-      await ref.read(authControllerProvider.notifier).signInWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Signed in successfully'),
-            backgroundColor: Colors.green,
-          ),
+    await ref
+        .read(authControllerProvider.notifier)
+        .signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
-      }
-    } catch (e) {
-      logError('Sign in error', e);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
   }
-
 
   @override
   Widget build(BuildContext context) {
+    // Listen to auth state changes for feedback
+    ref.listen<AuthState>(authControllerProvider, (previous, next) {
+      switch (next) {
+        case Authenticated():
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Signed in successfully'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0), // Optional: Rounded corners
+              ),
+              margin: const EdgeInsets.all(20.0),
+            ),
+          );
+        case Error(:final message):
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0), // Optional: Rounded corners
+              ),
+              margin: const EdgeInsets.all(20.0),
+            ),
+          );
+        default:
+          break;
+      }
+    });
+
+    final authState = ref.watch(authControllerProvider);
+    final isLoading = authState == const AuthState.loading();
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -95,16 +103,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     Text(
                       'Tutor Zone',
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Sign in to continue',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -116,7 +124,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       hintText: 'Enter your email',
                       keyboardType: TextInputType.emailAddress,
                       validator: AuthValidators.validateEmail,
-                      enabled: !_isLoading,
+                      enabled: !isLoading,
                       autofillHints: const [AutofillHints.email],
                       textInputAction: TextInputAction.next,
                     ),
@@ -129,7 +137,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       hintText: 'Enter your password',
                       isPassword: true,
                       validator: AuthValidators.validatePassword,
-                      enabled: !_isLoading,
+                      enabled: !isLoading,
                       autofillHints: const [AutofillHints.password],
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _handleSignIn(),
@@ -140,9 +148,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () => context.push(RoutePath.forgotPassword),
+                        onPressed: isLoading ? null : () => context.push(RoutePath.forgotPassword),
                         child: const Text('Forgot Password?'),
                       ),
                     ),
@@ -152,7 +158,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     AuthButton(
                       onPressed: _handleSignIn,
                       text: 'Sign In',
-                      isLoading: _isLoading,
+                      isLoading: isLoading,
                     ),
                     const SizedBox(height: 24),
 
@@ -161,9 +167,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     const SizedBox(height: 24),
 
                     // Google sign-in button
-                    GoogleSignInButton(
-                      clientId: _getGoogleClientId(),
-                    ),
+                    const GoogleSignInButton(),
                     const SizedBox(height: 24),
 
                     // Sign up link
@@ -175,9 +179,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         TextButton(
-                          onPressed: _isLoading
-                              ? null
-                              : () => context.push(RoutePath.signUp),
+                          onPressed: isLoading ? null : () => context.push(RoutePath.signUp),
                           child: const Text('Sign Up'),
                         ),
                       ],
@@ -190,14 +192,5 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         ),
       ),
     );
-  }
-
-  /// Get Google OAuth client ID based on platform
-  /// For Android/iOS, this is handled by google-services.json/GoogleService-Info.plist
-  /// For Web, provide the web client ID from Firebase Console
-  String _getGoogleClientId() {
-    // TODO: Replace with your actual web client ID from Firebase Console
-    // Get it from: Firebase Console > Authentication > Sign-in method > Google > Web SDK configuration
-    return '';
   }
 }
