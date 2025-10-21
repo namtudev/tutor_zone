@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
 import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
 import 'package:tutor_zone/features/auth/utils/auth_validators.dart';
 import 'package:tutor_zone/features/auth/views/ui_states/auth_state.dart';
@@ -49,29 +50,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
       switch (next) {
         case Authenticated():
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Signed in successfully'),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0), // Optional: Rounded corners
-              ),
-              margin: const EdgeInsets.all(20.0),
-            ),
-          );
+          context.showSuccessSnackBar('Signed in successfully');
         case AuthError(:final message):
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0), // Optional: Rounded corners
-              ),
-              margin: const EdgeInsets.all(20.0),
-            ),
-          );
+          context.showErrorSnackBar(message);
         default:
           break;
       }

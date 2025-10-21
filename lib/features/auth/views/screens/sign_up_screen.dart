@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
 import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
 import 'package:tutor_zone/features/auth/utils/auth_validators.dart';
 import 'package:tutor_zone/features/auth/views/ui_states/auth_state.dart';
@@ -50,19 +51,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
       switch (next) {
         case Authenticated():
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Account created successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('Account created successfully');
         case AuthError(:final message):
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar(message);
         default:
           break;
       }

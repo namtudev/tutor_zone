@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
 import 'package:tutor_zone/features/auth/utils/auth_validators.dart';
@@ -50,12 +51,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       logError('Password reset error', e);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar(e.toString());
         setState(() => _isLoading = false);
       }
     }
