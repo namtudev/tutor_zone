@@ -56,7 +56,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               backgroundColor: Colors.green,
             ),
           );
-        case Error(:final message):
+        case AuthError(:final message):
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(message),

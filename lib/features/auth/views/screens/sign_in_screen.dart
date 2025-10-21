@@ -60,7 +60,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               margin: const EdgeInsets.all(20.0),
             ),
           );
-        case Error(:final message):
+        case AuthError(:final message):
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(message),

@@ -7,6 +7,8 @@ part 'auth_state.freezed.dart';
 /// Represents the current authentication status of the user
 @freezed
 sealed class AuthState with _$AuthState {
+  const AuthState._();
+
   /// Initial state - authentication status unknown
   const factory AuthState.initial() = Initial;
 
@@ -20,5 +22,28 @@ sealed class AuthState with _$AuthState {
   const factory AuthState.unauthenticated() = Unauthenticated;
 
   /// Error state - authentication error occurred
-  const factory AuthState.error(String message) = Error;
+  const factory AuthState.error(String message, {StackTrace? stackTrace}) = AuthError;
+
+  /// Guard method for authenticated operations
+  /// Mimics AsyncValue.guard behavior for cleaner error handling
+  /// Returns AuthState.authenticated on success, AuthState.error on failure
+  static Future<AuthState> guard(Future<AuthUser> Function() future) async {
+    try {
+      final user = await future();
+      return AuthState.authenticated(user);
+    } catch (err, stack) {
+      return AuthState.error(err.toString(), stackTrace: stack);
+    }
+  }
+
+  /// Guard method for void operations (like signOut)
+  /// Returns AuthState.unauthenticated on success, AuthState.error on failure
+  static Future<AuthState> guardVoid(Future<void> Function() future) async {
+    try {
+      await future();
+      return const AuthState.unauthenticated();
+    } catch (err, stack) {
+      return AuthState.error(err.toString(), stackTrace: stack);
+    }
+  }
 }

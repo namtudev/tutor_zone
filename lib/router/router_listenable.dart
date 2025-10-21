@@ -14,7 +14,7 @@ part 'router_listenable.g.dart';
 ///
 /// The notifier is kept alive throughout the app lifecycle to maintain
 /// consistent router state.
-@Riverpod(keepAlive: true)
+@riverpod
 class RouterListenable extends _$RouterListenable implements Listenable {
   VoidCallback? _routeListener;
 
@@ -43,7 +43,7 @@ class RouterListenable extends _$RouterListenable implements Listenable {
       Unauthenticated() => 'Unauthenticated',
       Loading() => 'Loading',
       Initial() => 'Initial',
-      Error(:final message) => 'Error: $message',
+      AuthError(:final message) => 'Error: $message',
     };
   }
 
