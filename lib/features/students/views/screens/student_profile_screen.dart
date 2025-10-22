@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
+import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
+import 'package:tutor_zone/features/sessions/views/widgets/log_session_dialog.dart';
 import 'package:tutor_zone/features/students/controllers/students_controller.dart';
 import 'package:tutor_zone/features/students/models/data/student.dart';
 import 'package:tutor_zone/features/students/views/widgets/add_edit_student_dialog.dart';
@@ -165,7 +167,7 @@ class _WideLayout extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          const Expanded(flex: 2, child: _SessionHistoryCard()),
+          Expanded(flex: 2, child: _SessionHistoryCard(studentId: student.id)),
         ],
       ),
     );
@@ -185,7 +187,7 @@ class _NarrowLayout extends StatelessWidget {
         children: [
           _StudentInfoCard(student: student),
           const SizedBox(height: 16),
-          const _SessionHistoryCard(),
+          _SessionHistoryCard(studentId: student.id),
           const SizedBox(height: 16),
         ],
       ),
@@ -313,11 +315,13 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _SessionHistoryCard extends StatelessWidget {
-  const _SessionHistoryCard();
+class _SessionHistoryCard extends ConsumerWidget {
+  final String studentId;
+
+  const _SessionHistoryCard({required this.studentId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -330,7 +334,16 @@ class _SessionHistoryCard extends StatelessWidget {
                 Text('SESSION HISTORY', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                 Row(
                   children: [
-                    FilledButton.tonalIcon(onPressed: () {}, icon: const Icon(Icons.note_add), label: const Text('Add Session')),
+                    FilledButton.tonalIcon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => LogSessionDialog(studentId: studentId),
+                        );
+                      },
+                      icon: const Icon(Icons.note_add),
+                      label: const Text('Add Session'),
+                    ),
                     const SizedBox(width: 8),
                     FilledButton.tonalIcon(onPressed: () {}, icon: const Icon(Icons.timer), label: const Text('Timer')),
                   ],
@@ -338,7 +351,7 @@ class _SessionHistoryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const _SessionHistoryList(),
+            _SessionHistoryList(studentId: studentId),
           ],
         ),
       ),
@@ -346,75 +359,120 @@ class _SessionHistoryCard extends StatelessWidget {
   }
 }
 
-class _SessionHistoryList extends StatelessWidget {
-  const _SessionHistoryList();
+class _SessionHistoryList extends ConsumerWidget {
+  final String studentId;
+
+  const _SessionHistoryList({required this.studentId});
 
   @override
-  Widget build(BuildContext context) {
-    final sessions = [
-      _SessionData(date: 'Oct 15', time: '2:00-3:30pm', duration: '1.5 hrs', amount: 60, isPaid: false, notes: 'Worked on quadratic equations'),
-      _SessionData(date: 'Oct 13', time: '2:00-3:00pm', duration: '1.0 hr', amount: 40, isPaid: true, notes: 'Algebra review and homework help'),
-      _SessionData(date: 'Oct 10', time: '2:00-3:30pm', duration: '1.5 hrs', amount: 60, isPaid: true, notes: 'Introduction to trigonometry'),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sessionsAsync = ref.watch(sessionsByStudentStreamProvider(studentId));
 
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: sessions.length,
-      separatorBuilder: (context, index) => const Divider(),
-      itemBuilder: (context, index) {
-        final session = sessions[index];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Text(session.date, style: const TextStyle(fontWeight: FontWeight.w500)),
-                      const SizedBox(width: 16),
-                      Text(session.time),
-                      const SizedBox(width: 16),
-                      Text(session.duration),
-                      const SizedBox(width: 16),
-                      Text('\$${session.amount}', style: const TextStyle(fontWeight: FontWeight.w500)),
-                    ],
+    return sessionsAsync.when(
+      data: (sessions) {
+        if (sessions.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                children: [
+                  Icon(Icons.event_busy, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No sessions yet',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Click "Add Session" to log your first session',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: sessions.length,
+          separatorBuilder: (context, index) => const Divider(),
+          itemBuilder: (context, index) {
+            final session = sessions[index];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Row(
                   children: [
-                    Chip(
-                      avatar: Icon(
-                        session.isPaid ? Icons.check_circle : Icons.cancel,
-                        size: 16,
-                        color: session.isPaid ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(session.formattedDate, style: const TextStyle(fontWeight: FontWeight.w500)),
+                          const SizedBox(width: 16),
+                          Text(session.formattedTimeRange),
+                          const SizedBox(width: 16),
+                          Text('${session.durationHours.toStringAsFixed(1)} hrs'),
+                          const SizedBox(width: 16),
+                          Text('\$${session.amountDollars.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w500)),
+                        ],
                       ),
-                      label: Text(session.isPaid ? 'Paid' : 'Unpaid'),
-                      backgroundColor: session.isPaid ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.errorContainer,
                     ),
-                    if (!session.isPaid) ...[const SizedBox(width: 8), TextButton(onPressed: () {}, child: const Text('Pay'))],
+                    Row(
+                      children: [
+                        Chip(
+                          avatar: Icon(
+                            session.isPaid ? Icons.check_circle : Icons.cancel,
+                            size: 16,
+                            color: session.isPaid ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
+                          ),
+                          label: Text(session.isPaid ? 'Paid' : 'Unpaid'),
+                          backgroundColor: session.isPaid
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context).colorScheme.errorContainer,
+                        ),
+                        if (!session.isPaid) ...[
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () async {
+                              final controller = ref.read(sessionsControllerProvider.notifier);
+                              final result = await controller.markSessionAsPaid(session.id);
+
+                              if (!context.mounted) return;
+
+                              if (result.hasError) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: ${result.error}'),
+                                    backgroundColor: Theme.of(context).colorScheme.error,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Session marked as paid')),
+                                );
+                              }
+                            },
+                            child: const Text('Pay'),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
               ],
-            ),
-            const SizedBox(height: 4),
-            Text('Notes: ${session.notes}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-          ],
+            );
+          },
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('Error loading sessions: $error'),
+      ),
     );
   }
-}
-
-
-class _SessionData {
-  final String date;
-  final String time;
-  final String duration;
-  final int amount;
-  final bool isPaid;
-  final String notes;
-
-  _SessionData({required this.date, required this.time, required this.duration, required this.amount, required this.isPaid, required this.notes});
 }
