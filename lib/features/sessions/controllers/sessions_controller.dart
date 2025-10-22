@@ -44,11 +44,6 @@ Stream<List<Session>> unpaidSessionsStream(Ref ref) {
 }
 
 /// Controller for session CRUD operations with UI-bindable state.
-/// 
-/// Uses AsyncNotifier<void> pattern:
-/// - State provides loading/error feedback for UI
-/// - Methods return AsyncValue<void> for inline error handling
-/// - Data comes from stream providers (no duplication)
 @riverpod
 class SessionsController extends _$SessionsController {
   late final SessionRepository _repository;

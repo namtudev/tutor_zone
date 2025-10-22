@@ -101,7 +101,7 @@ Future<void> _initializeSchema(Database db) async {
       'migratedAt': DateTime.now().toIso8601String(),
     });
   } else {
-    final currentVersion = schemaRecord['version'] as int;
+    final currentVersion = schemaRecord['version']! as int;
     logInfo('Schema version: $currentVersion');
 
     // Future: Run migrations here if currentVersion < _schemaVersion

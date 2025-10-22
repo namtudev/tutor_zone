@@ -166,7 +166,7 @@ class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
         }
 
         return DropdownButtonFormField<String>(
-          value: _selectedStudentId,
+          initialValue: _selectedStudentId,
           decoration: InputDecoration(
             labelText: 'Select Student',
             border: const OutlineInputBorder(),

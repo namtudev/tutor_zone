@@ -29,10 +29,7 @@ Stream<List<Student>> studentsWithNegativeBalanceStream(Ref ref) {
   return repository.watchStudentsWithNegativeBalance();
 }
 
-/// Controller with AsyncValue<void> state for UI binding
-///
-/// UI can watch the state to show loading spinners and disable buttons.
-/// Methods return AsyncValue<void> for inline error handling.
+
 @riverpod
 class StudentsController extends _$StudentsController {
   StudentRepository get _repository => ref.read(studentRepositoryProvider);
