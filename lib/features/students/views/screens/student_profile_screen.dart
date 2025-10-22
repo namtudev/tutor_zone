@@ -438,9 +438,13 @@ class _SessionHistoryList extends ConsumerWidget {
                         if (!session.isPaid) ...[
                           const SizedBox(width: 8),
                           TextButton(
-                            onPressed: () async {
+                            onPressed: () {
+                              // Call controller method (updates state internally)
                               final controller = ref.read(sessionsControllerProvider.notifier);
-                              final result = await controller.markSessionAsPaid(session.id);
+                              controller.markSessionAsPaid(session.id);
+
+                              // Watch state to check result
+                              final result = ref.watch(sessionsControllerProvider);
 
                               if (!context.mounted) return;
 

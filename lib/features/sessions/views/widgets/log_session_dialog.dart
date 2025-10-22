@@ -381,8 +381,9 @@ class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
       _endTime!.minute,
     );
 
+    // Call controller method (updates state internally)
     final controller = ref.read(sessionsControllerProvider.notifier);
-    final result = await controller.createSession(
+    controller.createSession(
       studentId: _selectedStudentId!,
       start: start,
       end: end,
@@ -390,6 +391,9 @@ class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
       payStatus: _payStatus,
       notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
     );
+
+    // Watch state to check result
+    final result = ref.watch(sessionsControllerProvider);
 
     if (!mounted) return;
 

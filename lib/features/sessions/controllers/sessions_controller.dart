@@ -54,15 +54,10 @@ class SessionsController extends _$SessionsController {
   late final SessionRepository _repository;
 
   @override
-  AsyncValue<void> build() {
-    _repository = ref.watch(sessionRepositoryProvider);
-    return const AsyncData(null); // Idle state
-  }
+  Future<void> build() async {}
 
   /// Create a new session
-  /// 
-  /// Returns AsyncValue<void> for inline error handling in UI.
-  Future<AsyncValue<void>> createSession({
+  Future<void> createSession({
     required String studentId,
     required DateTime start,
     required DateTime end,
@@ -87,13 +82,10 @@ class SessionsController extends _$SessionsController {
       await _repository.create(session);
       logInfo('Session created successfully: ${session.id}');
     });
-    return state;
   }
 
   /// Update an existing session
-  /// 
-  /// Returns AsyncValue<void> for inline error handling in UI.
-  Future<AsyncValue<void>> updateSession({
+  Future<void> updateSession({
     required String id,
     required String studentId,
     required DateTime start,
@@ -125,26 +117,20 @@ class SessionsController extends _$SessionsController {
       await _repository.update(updated);
       logInfo('Session updated successfully: $id');
     });
-    return state;
   }
 
   /// Delete a session
-  /// 
-  /// Returns AsyncValue<void> for inline error handling in UI.
-  Future<AsyncValue<void>> deleteSession(String id) async {
+  Future<void> deleteSession(String id) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       logInfo('Deleting session: $id');
       await _repository.delete(id);
       logInfo('Session deleted successfully: $id');
     });
-    return state;
   }
 
   /// Mark session as paid
-  /// 
-  /// Returns AsyncValue<void> for inline error handling in UI.
-  Future<AsyncValue<void>> markSessionAsPaid(String id) async {
+  Future<void> markSessionAsPaid(String id) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       logInfo('Marking session as paid: $id');
@@ -158,13 +144,10 @@ class SessionsController extends _$SessionsController {
       await _repository.update(updated);
       logInfo('Session marked as paid: $id');
     });
-    return state;
   }
 
   /// Mark session as unpaid
-  /// 
-  /// Returns AsyncValue<void> for inline error handling in UI.
-  Future<AsyncValue<void>> markSessionAsUnpaid(String id) async {
+  Future<void> markSessionAsUnpaid(String id) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       logInfo('Marking session as unpaid: $id');
@@ -178,13 +161,10 @@ class SessionsController extends _$SessionsController {
       await _repository.update(updated);
       logInfo('Session marked as unpaid: $id');
     });
-    return state;
   }
 
   /// Mark session as completed
-  /// 
-  /// Returns AsyncValue<void> for inline error handling in UI.
-  Future<AsyncValue<void>> markSessionAsCompleted(String id) async {
+  Future<void> markSessionAsCompleted(String id) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       logInfo('Marking session as completed: $id');
@@ -198,13 +178,10 @@ class SessionsController extends _$SessionsController {
       await _repository.update(updated);
       logInfo('Session marked as completed: $id');
     });
-    return state;
   }
 
   /// Mark session as skipped
-  /// 
-  /// Returns AsyncValue<void> for inline error handling in UI.
-  Future<AsyncValue<void>> markSessionAsSkipped(String id) async {
+  Future<void> markSessionAsSkipped(String id) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       logInfo('Marking session as skipped: $id');
@@ -218,19 +195,15 @@ class SessionsController extends _$SessionsController {
       await _repository.update(updated);
       logInfo('Session marked as skipped: $id');
     });
-    return state;
   }
 
   /// Delete all sessions for a student (for cascade deletion)
-  /// 
-  /// Returns AsyncValue<void> for inline error handling in UI.
-  Future<AsyncValue<void>> deleteSessionsByStudentId(String studentId) async {
+  Future<void> deleteSessionsByStudentId(String studentId) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       logInfo('Deleting all sessions for student: $studentId');
       await _repository.deleteByStudentId(studentId);
       logInfo('All sessions deleted for student: $studentId');
     });
-    return state;
   }
 }
