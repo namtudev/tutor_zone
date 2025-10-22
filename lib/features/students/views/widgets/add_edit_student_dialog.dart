@@ -1,16 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
+import 'package:tutor_zone/features/students/controllers/students_controller.dart';
+import 'package:tutor_zone/features/students/models/data/student.dart';
 
 /// Dialog for adding or editing a student
-class AddEditStudentDialog extends StatelessWidget {
-  final bool isEdit;
+class AddEditStudentDialog extends ConsumerStatefulWidget {
+  final Student? student; // null = add mode, non-null = edit mode
 
-  const AddEditStudentDialog({super.key, this.isEdit = false});
+  const AddEditStudentDialog({super.key, this.student});
+
+  @override
+  ConsumerState<AddEditStudentDialog> createState() => _AddEditStudentDialogState();
+}
+
+class _AddEditStudentDialogState extends ConsumerState<AddEditStudentDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _rateController;
+
+  bool get _isEdit => widget.student != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.student?.name ?? '');
+    _rateController = TextEditingController(
+      text: widget.student != null ? widget.student!.hourlyRateDollars.toStringAsFixed(2) : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _rateController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(studentsControllerProvider).isLoading;
+
     return Dialog(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
         child: Column(
           children: [
             // Header
@@ -23,8 +57,14 @@ class AddEditStudentDialog extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(isEdit ? 'EDIT STUDENT' : 'ADD NEW STUDENT', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+                  Text(
+                    _isEdit ? 'EDIT STUDENT' : 'ADD NEW STUDENT',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                  ),
                 ],
               ),
             ),
@@ -33,97 +73,69 @@ class AddEditStudentDialog extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Basic Information
-                    Text('Basic Information', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Name *',
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Basic Information
+                      Text(
+                        'Basic Information',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Email',
-                              border: const OutlineInputBorder(),
-                              filled: true,
-                              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            ),
-                          ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Name *',
+                          border: const OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Phone',
-                              border: const OutlineInputBorder(),
-                              filled: true,
-                              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Subject & Rate
-                    Text('Subject & Rate', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: DropdownMenu<String>(
-                            label: Text('Subject(s) *'),
-                            expandedInsets: EdgeInsets.zero,
-                            dropdownMenuEntries: [
-                              DropdownMenuEntry(value: 'math', label: 'Math'),
-                              DropdownMenuEntry(value: 'physics', label: 'Physics'),
-                              DropdownMenuEntry(value: 'chemistry', label: 'Chemistry'),
-                              DropdownMenuEntry(value: 'cs', label: 'Computer Science'),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        FilledButton.tonalIcon(onPressed: () {}, icon: const Icon(Icons.add), label: const Text('Add Subject')),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Hourly Rate *',
-                        prefixText: '\$ ',
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Name is required';
+                          }
+                          return null;
+                        },
+                        enabled: !isLoading,
                       ),
-                      keyboardType: TextInputType.number,
-                    ),
+                      const SizedBox(height: 32),
 
-                    const SizedBox(height: 32),
-
-                    // Notes & Goals
-                    Text('Notes & Goals', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Enter notes, goals, or special requirements...',
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      // Rate
+                      Text(
+                        'Hourly Rate',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                      maxLines: 5,
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _rateController,
+                        decoration: InputDecoration(
+                          labelText: 'Hourly Rate *',
+                          prefixText: '\$ ',
+                          border: const OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          helperText: 'Enter rate in dollars (e.g., 40.00)',
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        ],
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Hourly rate is required';
+                          }
+                          final rate = double.tryParse(value);
+                          if (rate == null || rate <= 0) {
+                            return 'Enter a valid rate greater than 0';
+                          }
+                          return null;
+                        },
+                        enabled: !isLoading,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -138,9 +150,21 @@ class AddEditStudentDialog extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+                  TextButton(
+                    onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
                   const SizedBox(width: 12),
-                  FilledButton(onPressed: () {}, child: Text(isEdit ? 'Update Student' : 'Save Student')),
+                  FilledButton(
+                    onPressed: isLoading ? null : _saveStudent,
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(_isEdit ? 'Update Student' : 'Save Student'),
+                  ),
                 ],
               ),
             ),
@@ -148,5 +172,37 @@ class AddEditStudentDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _saveStudent() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final controller = ref.read(studentsControllerProvider.notifier);
+    final name = _nameController.text.trim();
+    final rateDollars = double.parse(_rateController.text.trim());
+    final rateCents = (rateDollars * 100).round();
+
+    if (_isEdit) {
+      controller.updateStudent(
+        id: widget.student!.id,
+        name: name,
+        hourlyRateCents: rateCents,
+      );
+    } else {
+      controller.createStudent(
+        name: name,
+        hourlyRateCents: rateCents,
+      );
+    }
+    final result = ref.watch(studentsControllerProvider);
+
+    if (!mounted) return;
+
+    if (result.hasError) {
+      context.showErrorSnackBar(result.error.toString());
+    } else {
+      Navigator.of(context).pop();
+      context.showSuccessSnackBar(_isEdit ? 'Student updated successfully' : 'Student created successfully');
+    }
   }
 }

@@ -8,6 +8,7 @@ import 'package:tutor_zone/config/firebase_options_prod.dart' as firebase_prod;
 import 'package:tutor_zone/config/firebase_options_staging.dart' as firebase_staging;
 import 'package:tutor_zone/core/access_mode/app_access_mode.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/core/local_storage/sembast_db.dart';
 import 'package:tutor_zone/flavors.dart';
 
 /// Initializes the application.
@@ -120,6 +121,10 @@ Future<void> _initProviders(
     // Example:
     // await container.read(authRepositoryProvider.notifier).fetchPreviousLogin();
     // container.read(someOtherProvider);
+
+    logInfo('Sembast init');
+    final db = await container.read(sembastDatabaseProvider.future);
+    logInfo('Sembast init success. Path: ${db.path}');
 
     logInfo('Providers initialized successfully');
   } catch (e, stackTrace) {
