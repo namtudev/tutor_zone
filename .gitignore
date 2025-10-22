@@ -12,9 +12,10 @@
 .swiftpm/
 migrate_working_dir/
 
-# Claude Code
+# AI Agent related
 CLAUDE.md
 .claude/
+AGENTS.md
 
 # Documentation
 .agent/
