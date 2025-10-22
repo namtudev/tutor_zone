@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:talker_flutter/talker_flutter.dart';
+import 'package:tutor_zone/core/access_mode/app_access_mode.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/auth/views/screens/forgot_password_screen.dart';
 import 'package:tutor_zone/features/auth/views/screens/profile_screen.dart';
@@ -70,13 +71,22 @@ final _settingsNavKey = GlobalKey<NavigatorState>(
 @riverpod
 GoRouter router(Ref ref) {
   final routerNotifier = ref.watch(routerListenableProvider.notifier);
+  final accessMode = ref.watch(appAccessModeProvider);
+  final initialLocation = accessMode.when(
+    data: (mode) => mode == AppAccessMode.local ? Routes.dashboard.path : Routes.signIn.path,
+    loading: () => Routes.signIn.path,
+    error: (error, stackTrace) {
+      logError('Failed to load access mode for router', error, stackTrace);
+      return Routes.signIn.path;
+    },
+  );
 
   return GoRouter(
     // Global navigator key
     navigatorKey: _rootNavigatorKey,
 
     // Start at sign in (redirect will handle auth)
-    initialLocation: Routes.signIn.path,
+    initialLocation: initialLocation,
 
     // Enable debug logging in debug mode
     debugLogDiagnostics: true,

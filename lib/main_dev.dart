@@ -7,6 +7,6 @@ import 'package:tutor_zone/flavors.dart';
 /// Development flavor entry point
 Future<void> main() async {
   F.appFlavor = Flavor.dev;
-  final container = await bootstrap(flavorConfig: FlavorConfig.dev, appBuilder: () => const App());
+  final container = await bootstrap(flavorConfig: FlavorConfig.dev);
   runApp(UncontrolledProviderScope(container: container, child: const App()));
 }

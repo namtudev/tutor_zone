@@ -10,15 +10,18 @@ class SessionTimerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Simulate timer running state
-    const isRunning = false;
+    final isRunning = ModalRoute.of(context)?.settings.arguments == 'running';
 
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
-          child: const Card(
-            child: Padding(padding: EdgeInsets.all(32.0), child: isRunning ? _RunningTimerView() : _IdleTimerView()),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: isRunning ? const _RunningTimerView() : const _IdleTimerView(),
+            ),
           ),
         ),
       ),

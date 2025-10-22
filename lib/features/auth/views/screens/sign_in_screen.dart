@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tutor_zone/core/access_mode/app_access_mode.dart';
 import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
 import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
 import 'package:tutor_zone/features/auth/utils/auth_validators.dart';
@@ -140,6 +141,21 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       onPressed: _handleSignIn,
                       text: 'Sign In',
                       isLoading: isLoading,
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              final router = GoRouter.of(context);
+                              await ref.read(appAccessModeProvider.notifier).setMode(AppAccessMode.local);
+                              if (!mounted) {
+                                return;
+                              }
+                              router.go(RoutePath.dashboard);
+                            },
+                      icon: const Icon(Icons.offline_pin),
+                      label: const Text('Continue without account'),
                     ),
                     const SizedBox(height: 24),
 

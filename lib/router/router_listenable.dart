@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:tutor_zone/core/access_mode/app_access_mode.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/auth/controllers/auth_controller.dart';
 import 'package:tutor_zone/features/auth/views/ui_states/auth_state.dart';
@@ -34,6 +35,17 @@ class RouterListenable extends _$RouterListenable implements Listenable {
       // Trigger router refresh when auth state changes
       _routeListener?.call();
     });
+
+    // Listen to access mode changes (local vs cloud)
+    ref.listen(appAccessModeProvider, (previous, next) {
+      final modeDescription = next.when(
+        data: (mode) => 'Access mode: ${mode.name}',
+        loading: () => 'Access mode: loading',
+        error: (error, _) => 'Access mode error: $error',
+      );
+      logInfo(modeDescription);
+      _routeListener?.call();
+    });
   }
 
   /// Get description of auth state for logging
@@ -55,6 +67,15 @@ class RouterListenable extends _$RouterListenable implements Listenable {
   /// Returns null if no redirect is needed, or a path string to redirect to.
   String? redirect(String location) {
     logDebug('Router redirect check for location: $location');
+
+    final accessMode = ref.read(appAccessModeProvider).maybeWhen(
+          data: (mode) => mode,
+          orElse: () => AppAccessMode.cloud,
+        );
+    if (accessMode == AppAccessMode.local) {
+      logDebug('Access mode is local; skipping auth redirects');
+      return null;
+    }
 
     final authState = ref.read(authControllerProvider);
     final isAuthenticated = switch (authState) {
