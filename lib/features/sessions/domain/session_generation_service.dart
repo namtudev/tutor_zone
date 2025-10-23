@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/features/balance/domain/allocation_service.dart';
 import 'package:tutor_zone/features/sessions/models/data/recurring_schedule.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
 import 'package:tutor_zone/features/sessions/models/data_sources/recurring_schedule_local_data_source.dart';
@@ -13,7 +14,8 @@ part 'session_generation_service.g.dart';
 SessionGenerationService sessionGenerationService(Ref ref) {
   final sessionDataSource = ref.watch(sessionLocalDataSourceProvider);
   final scheduleDataSource = ref.watch(recurringScheduleLocalDataSourceProvider);
-  return SessionGenerationService(sessionDataSource, scheduleDataSource);
+  final allocationService = ref.watch(allocationServiceProvider);
+  return SessionGenerationService(sessionDataSource, scheduleDataSource, allocationService);
 }
 
 /// Provides session generation logic from recurring schedules.
@@ -23,9 +25,14 @@ SessionGenerationService sessionGenerationService(Ref ref) {
 class SessionGenerationService {
   final SessionLocalDataSource _sessionDataSource;
   final RecurringScheduleLocalDataSource _scheduleDataSource;
+  final AllocationService _allocationService;
   final _uuid = const Uuid();
 
-  SessionGenerationService(this._sessionDataSource, this._scheduleDataSource);
+  SessionGenerationService(
+    this._sessionDataSource,
+    this._scheduleDataSource,
+    this._allocationService,
+  );
 
   /// Generate sessions for all active recurring schedules.
   ///
@@ -137,6 +144,15 @@ class SessionGenerationService {
       }
 
       logInfo('Generated $generatedCount sessions for schedule ${schedule.id}');
+
+      // Trigger allocation check if sessions were generated
+      if (generatedCount > 0) {
+        final allocatedCount = await _allocationService.runAllocationAfterGeneration(schedule.studentId);
+        if (allocatedCount > 0) {
+          logInfo('Auto-allocated $allocatedCount sessions for student ${schedule.studentId}');
+        }
+      }
+
       return generatedCount;
     } catch (e, stack) {
       logError('Failed to generate sessions for schedule ${schedule.id}', e, stack);

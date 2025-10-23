@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/features/balance/domain/allocation_service.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
 import 'package:tutor_zone/features/sessions/models/repositories/session_repository.dart';
 import 'package:uuid/uuid.dart';
@@ -111,6 +112,19 @@ class SessionsController extends _$SessionsController {
 
       await _repository.update(updated);
       logInfo('Session updated successfully: $id');
+
+      // Trigger allocation check if amount changed (due to time or rate change)
+      final amountChanged = start.toIso8601String() != existing.start ||
+          end.toIso8601String() != existing.end ||
+          rateSnapshotCents != existing.rateSnapshotCents;
+
+      if (amountChanged) {
+        final allocationService = ref.read(allocationServiceProvider);
+        final allocated = await allocationService.runAllocationAfterSessionSave(existing.studentId);
+        if (allocated) {
+          logInfo('Auto-allocation performed for student ${existing.studentId}');
+        }
+      }
     });
   }
 

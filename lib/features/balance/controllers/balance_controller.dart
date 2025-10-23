@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/features/balance/domain/allocation_service.dart';
 import 'package:tutor_zone/features/balance/models/data/balance_change.dart';
 import 'package:tutor_zone/features/balance/models/repositories/balance_change_repository.dart';
 import 'package:tutor_zone/features/balance/models/repositories/ledger_repository.dart';
@@ -96,6 +97,13 @@ class BalanceController extends _$BalanceController {
       }
 
       logInfo('Payment recorded successfully: ${balanceChange.id}');
+
+      // Trigger allocation check
+      final allocationService = ref.read(allocationServiceProvider);
+      final allocated = await allocationService.runAllocationAfterBalanceChange(studentId);
+      if (allocated) {
+        logInfo('Auto-allocation performed for student $studentId');
+      }
     });
   }
 
@@ -128,6 +136,15 @@ class BalanceController extends _$BalanceController {
       }
 
       logInfo('Adjustment recorded successfully: ${balanceChange.id}');
+
+      // Trigger allocation check (only for positive adjustments)
+      if (amountCents > 0) {
+        final allocationService = ref.read(allocationServiceProvider);
+        final allocated = await allocationService.runAllocationAfterBalanceChange(studentId);
+        if (allocated) {
+          logInfo('Auto-allocation performed for student $studentId');
+        }
+      }
     });
   }
 
