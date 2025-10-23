@@ -28,15 +28,12 @@ void main() {
 
     setUp(() {
       mockRepository = MockStudentRepository();
-      container = ProviderContainer(
+      // Use ProviderContainer.test() for automatic disposal
+      container = ProviderContainer.test(
         overrides: [
           studentRepositoryProvider.overrideWithValue(mockRepository),
         ],
       );
-    });
-
-    tearDown(() {
-      container.dispose();
     });
 
     group('createStudent', () {
@@ -218,8 +215,6 @@ void main() {
         expect(state.error.toString(), contains('Deletion failed'));
       });
     });
-
-
   });
 }
 

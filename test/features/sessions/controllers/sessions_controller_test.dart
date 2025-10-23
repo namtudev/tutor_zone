@@ -21,8 +21,8 @@ void main() {
       Session.create(
         id: 'test-id',
         studentId: 'student-1',
-        start: DateTime(2025, 1, 15, 10, 0),
-        end: DateTime(2025, 1, 15, 11, 0),
+        start: DateTime(2025, 1, 15, 10),
+        end: DateTime(2025, 1, 15, 11),
         rateSnapshotCents: 5000,
       ),
     );
@@ -36,16 +36,13 @@ void main() {
     setUp(() {
       mockRepository = MockSessionRepository();
       mockAllocationService = MockAllocationService();
-      container = ProviderContainer(
+      // Use ProviderContainer.test() for automatic disposal
+      container = ProviderContainer.test(
         overrides: [
           sessionRepositoryProvider.overrideWithValue(mockRepository),
           allocationServiceProvider.overrideWithValue(mockAllocationService),
         ],
       );
-    });
-
-    tearDown(() {
-      container.dispose();
     });
 
     group('createSession', () {
@@ -54,8 +51,8 @@ void main() {
         final session = Session.create(
           id: 'session-1',
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
         when(() => mockRepository.create(any())).thenAnswer((_) async => session);
@@ -65,8 +62,8 @@ void main() {
         // Act
         await controller.createSession(
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
 
@@ -86,8 +83,8 @@ void main() {
         // Act
         await controller.createSession(
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
 
@@ -104,8 +101,8 @@ void main() {
         final existingSession = Session.create(
           id: 'session-1',
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
 
@@ -121,8 +118,8 @@ void main() {
         await controller.updateSession(
           id: 'session-1',
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 11, 0),
-          end: DateTime(2025, 1, 15, 12, 0),
+          start: DateTime(2025, 1, 15, 11),
+          end: DateTime(2025, 1, 15, 12),
           rateSnapshotCents: 5000,
         );
 
@@ -143,8 +140,8 @@ void main() {
         await controller.updateSession(
           id: 'session-1',
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
 
@@ -179,8 +176,8 @@ void main() {
         final session = Session.create(
           id: 'session-1',
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
 
@@ -222,8 +219,8 @@ void main() {
         final session = Session.create(
           id: 'session-1',
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
           payStatus: PaymentStatus.paid,
         );
@@ -250,8 +247,8 @@ void main() {
         final session = Session.create(
           id: 'session-1',
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
 
@@ -277,8 +274,8 @@ void main() {
         final session = Session.create(
           id: 'session-1',
           studentId: 'student-1',
-          start: DateTime(2025, 1, 15, 10, 0),
-          end: DateTime(2025, 1, 15, 11, 0),
+          start: DateTime(2025, 1, 15, 10),
+          end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
 
