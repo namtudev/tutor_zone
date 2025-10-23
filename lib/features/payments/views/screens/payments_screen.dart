@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+import 'package:tutor_zone/features/payments/views/widgets/record_payment_dialog.dart';
+import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
+import 'package:tutor_zone/features/students/controllers/students_controller.dart';
 
 /// Payments and balances screen showing unpaid sessions and student balances
-class PaymentsScreen extends StatelessWidget {
+class PaymentsScreen extends ConsumerWidget {
   const PaymentsScreen({super.key});
 
   /// Route name for navigation
   static const String routeName = 'payments';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unpaidSessionsAsync = ref.watch(unpaidSessionsStreamProvider);
+    final studentsAsync = ref.watch(studentsStreamProvider);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -16,24 +25,61 @@ class PaymentsScreen extends StatelessWidget {
         children: [
           Text('SUMMARY', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
           const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final crossAxisCount = constraints.maxWidth >= 800 ? 3 : 1;
-              return GridView.count(
-                crossAxisCount: crossAxisCount,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: constraints.maxWidth >= 800 ? 2.5 : 3.5,
-                children: const [
-                  _SummaryCard(title: 'TOTAL OWED', value: '\$320', subtitle: '8 sessions', icon: Icons.payment, isError: true),
-                  _SummaryCard(title: 'PREPAID CREDIT', value: '\$100', subtitle: '1 student', icon: Icons.account_balance_wallet),
-                  _SummaryCard(title: 'NET BALANCE', value: '-\$220', subtitle: '3 students owe', icon: Icons.analytics, isError: true),
-                ],
-              );
-            },
+
+          // Summary cards with live data
+          unpaidSessionsAsync.when(
+            data: (unpaidSessions) => studentsAsync.when(
+              data: (students) {
+                // Calculate totals
+                final totalOwed = unpaidSessions.fold<int>(0, (sum, session) => sum + session.amountCents);
+                final totalPrepaid = students.where((s) => s.balanceCents > 0).fold<int>(0, (sum, s) => sum + s.balanceCents);
+                final netBalance = totalPrepaid - totalOwed;
+                final studentsWithDebt = students.where((s) => s.balanceCents < 0).length;
+                final studentsWithCredit = students.where((s) => s.balanceCents > 0).length;
+
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final crossAxisCount = constraints.maxWidth >= 800 ? 3 : 1;
+                    return GridView.count(
+                      crossAxisCount: crossAxisCount,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: constraints.maxWidth >= 800 ? 2.5 : 3.5,
+                      children: [
+                        _SummaryCard(
+                          title: 'TOTAL OWED',
+                          value: '\$${(totalOwed / 100).toStringAsFixed(2)}',
+                          subtitle: '${unpaidSessions.length} sessions',
+                          icon: Icons.payment,
+                          isError: true,
+                        ),
+                        _SummaryCard(
+                          title: 'PREPAID CREDIT',
+                          value: '\$${(totalPrepaid / 100).toStringAsFixed(2)}',
+                          subtitle: '$studentsWithCredit student${studentsWithCredit != 1 ? 's' : ''}',
+                          icon: Icons.account_balance_wallet,
+                        ),
+                        _SummaryCard(
+                          title: 'NET BALANCE',
+                          value: '${netBalance < 0 ? '-' : '+'}\$${(netBalance.abs() / 100).toStringAsFixed(2)}',
+                          subtitle: '$studentsWithDebt student${studentsWithDebt != 1 ? 's' : ''} owe',
+                          icon: Icons.analytics,
+                          isError: netBalance < 0,
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(child: Text('Error loading students: $error')),
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('Error loading sessions: $error')),
           ),
+
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -95,174 +141,255 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-class _UnpaidSessionsList extends StatelessWidget {
+class _UnpaidSessionsList extends ConsumerWidget {
   const _UnpaidSessionsList();
 
   @override
-  Widget build(BuildContext context) {
-    final sessions = [
-      _UnpaidSessionData(student: 'Sarah Chen', date: 'Oct 15', duration: '1.5 hrs', amount: 60, daysAgo: 3),
-      _UnpaidSessionData(student: 'Sarah Chen', date: 'Oct 08', duration: '0.5 hr', amount: 20, daysAgo: 10),
-      _UnpaidSessionData(student: 'Alex Kumar', date: 'Oct 10', duration: '2.0 hrs', amount: 120, daysAgo: 8),
-      _UnpaidSessionData(student: 'Emma Davis', date: 'Oct 17', duration: '1.0 hr', amount: 40, daysAgo: 1),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unpaidSessionsAsync = ref.watch(unpaidSessionsStreamProvider);
+    final studentsAsync = ref.watch(studentsStreamProvider);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 800;
-
-        if (isWide) {
+    return unpaidSessionsAsync.when(
+      data: (sessions) {
+        if (sessions.isEmpty) {
           return Card(
-            child: DataTable(
-              columns: const [
-                DataColumn(label: Text('')),
-                DataColumn(label: Text('Student')),
-                DataColumn(label: Text('Date')),
-                DataColumn(label: Text('Duration')),
-                DataColumn(label: Text('Amount')),
-                DataColumn(label: Text('Age')),
-              ],
-              rows: sessions
-                  .map(
-                    (session) => DataRow(
-                      cells: [
-                        DataCell(Checkbox(value: false, onChanged: (value) {})),
-                        DataCell(Text(session.student)),
-                        DataCell(Text(session.date)),
-                        DataCell(Text(session.duration)),
-                        DataCell(Text('\$${session.amount}')),
-                        DataCell(Text('${session.daysAgo} days')),
-                      ],
-                    ),
-                  )
-                  .toList(),
-            ),
-          );
-        } else {
-          return Card(
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: sessions.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final session = sessions[index];
-                return CheckboxListTile(
-                  value: false,
-                  onChanged: (value) {},
-                  title: Text(session.student),
-                  subtitle: Text('${session.date} • ${session.duration} • \$${session.amount}'),
-                  secondary: Text('${session.daysAgo}d'),
-                );
-              },
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 48, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(height: 16),
+                    Text('No unpaid sessions', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    Text('All sessions are paid up!', style: Theme.of(context).textTheme.bodyMedium),
+                  ],
+                ),
+              ),
             ),
           );
         }
+
+        return studentsAsync.when(
+          data: (students) {
+            // Create a map of student IDs to names for quick lookup
+            final studentMap = {for (final s in students) s.id: s.name};
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 800;
+
+                if (isWide) {
+                  return Card(
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text('')),
+                        DataColumn(label: Text('Student')),
+                        DataColumn(label: Text('Date')),
+                        DataColumn(label: Text('Duration')),
+                        DataColumn(label: Text('Amount')),
+                        DataColumn(label: Text('Age')),
+                      ],
+                      rows: sessions.map((session) {
+                        final studentName = studentMap[session.studentId] ?? 'Unknown';
+                        final sessionDate = DateTime.parse(session.start);
+                        final daysAgo = DateTime.now().difference(sessionDate).inDays;
+                        final dateStr = DateFormat('MMM dd').format(sessionDate);
+
+                        return DataRow(
+                          cells: [
+                            DataCell(Checkbox(value: false, onChanged: (value) {})),
+                            DataCell(Text(studentName)),
+                            DataCell(Text(dateStr)),
+                            DataCell(Text('${session.durationHours.toStringAsFixed(1)} hrs')),
+                            DataCell(Text('\$${session.amountDollars.toStringAsFixed(2)}')),
+                            DataCell(Text('$daysAgo days')),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  );
+                } else {
+                  return Card(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: sessions.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final session = sessions[index];
+                        final studentName = studentMap[session.studentId] ?? 'Unknown';
+                        final sessionDate = DateTime.parse(session.start);
+                        final daysAgo = DateTime.now().difference(sessionDate).inDays;
+                        final dateStr = DateFormat('MMM dd').format(sessionDate);
+
+                        return CheckboxListTile(
+                          value: false,
+                          onChanged: (value) {},
+                          title: Text(studentName),
+                          subtitle: Text('$dateStr • ${session.durationHours.toStringAsFixed(1)} hrs • \$${session.amountDollars.toStringAsFixed(2)}'),
+                          secondary: Text('${daysAgo}d'),
+                        );
+                      },
+                    ),
+                  );
+                }
+              },
+            );
+          },
+          loading: () => const Card(child: Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))),
+          error: (error, stack) => Card(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error'))),
+        );
       },
+      loading: () => const Card(child: Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))),
+      error: (error, stack) => Card(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error'))),
     );
   }
 }
 
-class _StudentBalancesList extends StatelessWidget {
+class _StudentBalancesList extends ConsumerWidget {
   const _StudentBalancesList();
 
   @override
-  Widget build(BuildContext context) {
-    final balances = [
-      _StudentBalanceData(name: 'Sarah Chen', owed: 80, prepaid: 0, netBalance: -80),
-      _StudentBalanceData(name: 'Mike Johnson', owed: 0, prepaid: 100, netBalance: 100),
-      _StudentBalanceData(name: 'Alex Kumar', owed: 120, prepaid: 0, netBalance: -120),
-      _StudentBalanceData(name: 'Emma Davis', owed: 40, prepaid: 0, netBalance: -40),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final studentsAsync = ref.watch(studentsStreamProvider);
+    final unpaidSessionsAsync = ref.watch(unpaidSessionsStreamProvider);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 800;
-
-        if (isWide) {
+    return studentsAsync.when(
+      data: (students) {
+        if (students.isEmpty) {
           return Card(
-            child: DataTable(
-              columns: const [
-                DataColumn(label: Text('Student')),
-                DataColumn(label: Text('Owed')),
-                DataColumn(label: Text('Prepaid')),
-                DataColumn(label: Text('Net Balance')),
-                DataColumn(label: Text('Action')),
-              ],
-              rows: balances
-                  .map(
-                    (balance) => DataRow(
-                      cells: [
-                        DataCell(Text(balance.name)),
-                        DataCell(Text('\$${balance.owed}')),
-                        DataCell(Text('\$${balance.prepaid}')),
-                        DataCell(
-                          Text(
-                            '${balance.netBalance > 0 ? "+" : ""}\$${balance.netBalance}',
-                            style: TextStyle(
-                              color: balance.netBalance < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        DataCell(FilledButton.tonal(onPressed: () {}, child: Text(balance.netBalance < 0 ? 'Collect' : 'View'))),
-                      ],
-                    ),
-                  )
-                  .toList(),
-            ),
-          );
-        } else {
-          return Card(
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: balances.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final balance = balances[index];
-                return ListTile(
-                  title: Text(balance.name),
-                  subtitle: Text('Owed: \$${balance.owed} • Prepaid: \$${balance.prepaid}'),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '${balance.netBalance > 0 ? "+" : ""}\$${balance.netBalance}',
-                        style: TextStyle(
-                          color: balance.netBalance < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      TextButton(onPressed: () {}, child: Text(balance.netBalance < 0 ? 'Collect' : 'View')),
-                    ],
-                  ),
-                );
-              },
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.people_outline, size: 48, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(height: 16),
+                    Text('No students yet', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    Text('Add students to track balances', style: Theme.of(context).textTheme.bodyMedium),
+                  ],
+                ),
+              ),
             ),
           );
         }
+
+        return unpaidSessionsAsync.when(
+          data: (unpaidSessions) {
+            // Calculate owed amount per student
+            final owedByStudent = <String, int>{};
+            for (final session in unpaidSessions) {
+              owedByStudent[session.studentId] = (owedByStudent[session.studentId] ?? 0) + session.amountCents;
+            }
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 800;
+
+                if (isWide) {
+                  return Card(
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Student')),
+                        DataColumn(label: Text('Owed')),
+                        DataColumn(label: Text('Balance')),
+                        DataColumn(label: Text('Net')),
+                        DataColumn(label: Text('Action')),
+                      ],
+                      rows: students.map((student) {
+                        final owed = owedByStudent[student.id] ?? 0;
+                        final balance = student.balanceCents;
+                        final net = balance - owed;
+
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(student.name)),
+                            DataCell(Text('\$${(owed / 100).toStringAsFixed(2)}')),
+                            DataCell(Text('\$${student.balanceDollars.toStringAsFixed(2)}')),
+                            DataCell(
+                              Text(
+                                '${net > 0 ? "+" : ""}\$${(net.abs() / 100).toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: net < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              FilledButton.tonal(
+                                onPressed: () {
+                                  showDialog<void>(
+                                    context: context,
+                                    builder: (context) => RecordPaymentDialog(
+                                      studentId: student.id,
+                                    ),
+                                  );
+                                },
+                                child: Text(net < 0 ? 'Collect' : 'View'),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  );
+                } else {
+                  return Card(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: students.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final student = students[index];
+                        final owed = owedByStudent[student.id] ?? 0;
+                        final balance = student.balanceCents;
+                        final net = balance - owed;
+
+                        return ListTile(
+                          title: Text(student.name),
+                          subtitle: Text('Owed: \$${(owed / 100).toStringAsFixed(2)} • Balance: \$${student.balanceDollars.toStringAsFixed(2)}'),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '${net > 0 ? "+" : ""}\$${(net.abs() / 100).toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: net < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  showDialog<void>(
+                                    context: context,
+                                    builder: (context) => RecordPaymentDialog(
+                                      studentId: student.id,
+                                    ),
+                                  );
+                                },
+                                child: Text(net < 0 ? 'Collect' : 'View'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
+              },
+            );
+          },
+          loading: () => const Card(child: Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))),
+          error: (error, stack) => Card(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error'))),
+        );
       },
+      loading: () => const Card(child: Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))),
+      error: (error, stack) => Card(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error'))),
     );
   }
 }
 
-class _UnpaidSessionData {
-  final String student;
-  final String date;
-  final String duration;
-  final int amount;
-  final int daysAgo;
-
-  _UnpaidSessionData({required this.student, required this.date, required this.duration, required this.amount, required this.daysAgo});
-}
-
-class _StudentBalanceData {
-  final String name;
-  final int owed;
-  final int prepaid;
-  final int netBalance;
-
-  _StudentBalanceData({required this.name, required this.owed, required this.prepaid, required this.netBalance});
-}
