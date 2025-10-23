@@ -22,7 +22,7 @@ linter:
     prefer_single_quotes: true
 
     # Good packages document everything
-    public_member_api_docs: false
+    public_member_api_docs: true
 
     # Low value and high cost to change on all files
     eol_at_end_of_file: false

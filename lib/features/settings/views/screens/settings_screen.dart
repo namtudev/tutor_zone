@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tutor_zone/core/access_mode/app_access_mode.dart';
+import 'package:tutor_zone/router/route_config.dart';
 
 /// Settings screen for user preferences and configuration
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   /// Route name for navigation
   static const String routeName = 'settings';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accessModeAsync = ref.watch(appAccessModeProvider);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: ConstrainedBox(
@@ -16,6 +22,79 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Access Mode Section
+            Text('ACCESS MODE', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          accessModeAsync.maybeWhen(
+                            data: (mode) => mode == AppAccessMode.local ? Icons.offline_pin : Icons.cloud,
+                            orElse: () => Icons.help_outline,
+                          ),
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Current Mode',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              accessModeAsync.when(
+                                data: (mode) => Text(
+                                  mode == AppAccessMode.local ? 'Local (Offline)' : 'Cloud (Online)',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                loading: () => const Text('Loading...'),
+                                error: (error, stack) => const Text('Error loading mode'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        accessModeAsync.maybeWhen(
+                          data: (mode) => Switch(
+                            value: mode == AppAccessMode.cloud,
+                            onChanged: (value) => _showModeSwitchDialog(
+                              context,
+                              ref,
+                              value ? AppAccessMode.cloud : AppAccessMode.local,
+                            ),
+                          ),
+                          orElse: () => const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      accessModeAsync.maybeWhen(
+                        data: (mode) => mode == AppAccessMode.local
+                            ? 'All data is stored locally on this device. No internet connection required.'
+                            : 'Data is synced to the cloud. Requires internet connection and authentication.',
+                        orElse: () => '',
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
             Text('PROFILE', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
             const SizedBox(height: 12),
             Card(
@@ -223,5 +302,147 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Show dialog to confirm mode switch with data loss warning
+  void _showModeSwitchDialog(BuildContext context, WidgetRef ref, AppAccessMode newMode) {
+    final currentMode = ref.read(appAccessModeProvider).maybeWhen(
+          data: (mode) => mode,
+          orElse: () => AppAccessMode.local,
+        );
+
+    // Don't show dialog if switching to same mode
+    if (currentMode == newMode) return;
+
+    showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(
+          Icons.warning_amber_rounded,
+          color: Theme.of(context).colorScheme.error,
+          size: 48,
+        ),
+        title: Text('Switch to ${newMode == AppAccessMode.local ? 'Local' : 'Cloud'} Mode?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Switching modes will clear all current data on this device.',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.errorContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'This action cannot be undone. Make sure to export your data first if needed.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onErrorContainer,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Switch Mode'),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true && context.mounted) {
+        _performModeSwitch(context, ref, newMode);
+      }
+    });
+  }
+
+  /// Perform the actual mode switch and cleanup
+  Future<void> _performModeSwitch(BuildContext context, WidgetRef ref, AppAccessMode newMode) async {
+    // Capture navigator before async gap
+    final navigator = Navigator.of(context);
+    final router = GoRouter.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final theme = Theme.of(context);
+
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Switching modes...'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // TODO: Clear Sembast DB when switching to cloud
+      // TODO: Clear Firebase cache when switching to local
+      // For now, just switch the mode
+      await ref.read(appAccessModeProvider.notifier).setMode(newMode);
+
+      // Close loading dialog
+      navigator.pop();
+
+      // Navigate to appropriate screen
+      if (newMode == AppAccessMode.local) {
+        router.go(Routes.dashboard.path);
+      } else {
+        router.go(Routes.signIn.path);
+      }
+
+      // Show success message
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Switched to ${newMode == AppAccessMode.local ? 'Local' : 'Cloud'} mode'),
+          backgroundColor: theme.colorScheme.primary,
+        ),
+      );
+    } catch (e) {
+      // Close loading dialog if still open
+      navigator.pop();
+
+      // Show error message
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Failed to switch mode: $e'),
+          backgroundColor: theme.colorScheme.error,
+        ),
+      );
+    }
   }
 }
