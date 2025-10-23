@@ -28,6 +28,7 @@ class SessionGenerationService {
   final AllocationService _allocationService;
   final _uuid = const Uuid();
 
+  /// Creates a new [SessionGenerationService] with the given dependencies.
   SessionGenerationService(
     this._sessionDataSource,
     this._scheduleDataSource,

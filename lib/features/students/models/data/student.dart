@@ -13,6 +13,7 @@ part 'student.g.dart';
 abstract class Student with _$Student {
   const Student._();
 
+  /// Creates a new [Student] instance.
   const factory Student({
     /// Unique identifier (UUID)
     required String id,

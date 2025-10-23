@@ -62,6 +62,7 @@ abstract class BalanceChangeRepository {
 class BalanceChangeRepositoryLocal implements BalanceChangeRepository {
   final BalanceChangeLocalDataSource _dataSource;
 
+  /// Creates a new [BalanceChangeRepositoryLocal] with the given data source.
   BalanceChangeRepositoryLocal(this._dataSource);
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 /// Primary action button for authentication forms
 /// Shows loading indicator when isLoading is true
 class AuthButton extends StatelessWidget {
+  /// Creates a new [AuthButton]
   const AuthButton({
     required this.onPressed,
     required this.text,
@@ -10,8 +11,13 @@ class AuthButton extends StatelessWidget {
     super.key,
   });
 
+  /// Callback when button is pressed
   final VoidCallback? onPressed;
+
+  /// Button text
   final String text;
+
+  /// Whether to show loading indicator
   final bool isLoading;
 
   @override

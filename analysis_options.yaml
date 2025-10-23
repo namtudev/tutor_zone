@@ -8,7 +8,6 @@ analyzer:
     - lib/features/appsync/domain/entities/generated/**
     - '**/*.g.dart'
     - '**/*.freezed.dart'
-    - test/**
   errors:
     invalid_annotation_target: ignore
 

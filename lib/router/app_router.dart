@@ -280,6 +280,7 @@ GoRouter router(Ref ref) {
 
 /// 404 Not Found screen
 class NotFoundScreen extends StatelessWidget {
+  /// Creates a new [NotFoundScreen]
   const NotFoundScreen({super.key});
 
   @override

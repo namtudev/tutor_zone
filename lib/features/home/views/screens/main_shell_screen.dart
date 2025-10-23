@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 /// This screen uses GoRouter's StatefulNavigationShell to maintain navigation state
 /// across tab switches and enable URL-based navigation.
 class MainShellScreen extends StatelessWidget {
+  /// Creates a new [MainShellScreen] with the given navigation shell
   const MainShellScreen({
     required this.navigationShell,
     super.key,

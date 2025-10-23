@@ -68,6 +68,7 @@ abstract class StudentRepository {
 class StudentRepositoryLocal implements StudentRepository {
   final StudentLocalDataSource _dataSource;
 
+  /// Creates a new [StudentRepositoryLocal] with the given data source.
   StudentRepositoryLocal(this._dataSource);
 
   @override

@@ -18,7 +18,10 @@ LedgerRepository ledgerRepository(Ref ref) {
 
 /// Ledger entry type
 enum LedgerEntryType {
+  /// Session entry (debit)
   session,
+
+  /// Balance change entry (credit/adjustment)
   balanceChange,
 }
 
@@ -80,6 +83,7 @@ class LedgerRepository {
   final SessionRepository _sessionRepo;
   final BalanceChangeRepository _balanceChangeRepo;
 
+  /// Creates a new [LedgerRepository] with the given repositories.
   LedgerRepository(this._sessionRepo, this._balanceChangeRepo);
 
   /// Get ledger entries for a student (chronological order, oldest first)

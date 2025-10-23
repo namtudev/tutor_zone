@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 /// Reusable text field for authentication forms
 /// Supports email, password, and general text input with validation
 class AuthTextField extends StatefulWidget {
+  /// Creates a new [AuthTextField]
   const AuthTextField({
     required this.controller,
     required this.labelText,
@@ -17,15 +18,34 @@ class AuthTextField extends StatefulWidget {
     super.key,
   });
 
+  /// Text editing controller
   final TextEditingController controller;
+
+  /// Label text
   final String labelText;
+
+  /// Hint text
   final String? hintText;
+
+  /// Keyboard type
   final TextInputType keyboardType;
+
+  /// Whether this is a password field
   final bool isPassword;
+
+  /// Validation function
   final String? Function(String?)? validator;
+
+  /// Whether the field is enabled
   final bool enabled;
+
+  /// Autofill hints
   final Iterable<String>? autofillHints;
+
+  /// Text input action
   final TextInputAction? textInputAction;
+
+  /// Callback when field is submitted
   final void Function(String)? onFieldSubmitted;
 
   @override

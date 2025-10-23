@@ -17,6 +17,7 @@ SessionLocalDataSource sessionLocalDataSource(Ref ref) {
 class SessionLocalDataSource {
   final Database _db;
 
+  /// Creates a new [SessionLocalDataSource] with the given database.
   SessionLocalDataSource(this._db);
 
   /// Create a new session

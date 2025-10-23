@@ -11,6 +11,7 @@ import 'package:tutor_zone/features/auth/views/widgets/auth_text_field.dart';
 /// Custom forgot password screen
 /// Allows users to reset their password via email
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
+  /// Creates a new [ForgotPasswordScreen]
   const ForgotPasswordScreen({super.key});
 
   @override

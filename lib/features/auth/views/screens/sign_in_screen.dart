@@ -14,6 +14,7 @@ import 'package:tutor_zone/router/route_path.dart';
 
 /// Custom sign-in screen with email/password and Google Sign-In
 class SignInScreen extends ConsumerStatefulWidget {
+  /// Creates a new [SignInScreen]
   const SignInScreen({super.key});
 
   @override

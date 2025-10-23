@@ -12,6 +12,7 @@ import 'package:tutor_zone/features/auth/views/widgets/google_sign_in_button.dar
 
 /// Custom sign-up screen with email/password and Google Sign-In
 class SignUpScreen extends ConsumerStatefulWidget {
+  /// Creates a new [SignUpScreen]
   const SignUpScreen({super.key});
 
   @override

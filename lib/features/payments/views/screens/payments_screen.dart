@@ -8,6 +8,7 @@ import 'package:tutor_zone/features/students/controllers/students_controller.dar
 
 /// Payments and balances screen showing unpaid sessions and student balances
 class PaymentsScreen extends ConsumerWidget {
+  /// Creates a new [PaymentsScreen]
   const PaymentsScreen({super.key});
 
   /// Route name for navigation

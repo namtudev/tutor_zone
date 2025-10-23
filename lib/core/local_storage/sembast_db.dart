@@ -19,11 +19,22 @@ const _schemaVersion = 1;
 
 /// Store names as constants.
 class StoreNames {
+  /// Schema state store name
   static const schemaState = 'schema_state';
+
+  /// Students store name
   static const students = 'students';
+
+  /// Sessions store name
   static const sessions = 'sessions';
+
+  /// Balance changes store name
   static const balanceChanges = 'balance_changes';
+
+  /// Recurring schedules store name
   static const recurringSchedules = 'recurring_schedules';
+
+  /// App preferences store name
   static const appPrefs = 'app_prefs';
 }
 

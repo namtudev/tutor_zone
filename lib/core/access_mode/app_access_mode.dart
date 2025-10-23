@@ -8,7 +8,10 @@ part 'app_access_mode.g.dart';
 
 /// Supported access modes for the application.
 enum AppAccessMode {
+  /// Local mode (offline, Sembast database)
   local,
+
+  /// Cloud mode (online, Firebase/Firestore)
   cloud,
 }
 
@@ -31,6 +34,7 @@ Future<AppAccessMode> loadInitialAccessMode() async {
   }
 }
 
+/// Riverpod notifier for managing app access mode state
 @Riverpod(keepAlive: true)
 class AppAccessModeNotifier extends _$AppAccessModeNotifier {
   SharedPreferences? _prefs;
@@ -46,6 +50,7 @@ class AppAccessModeNotifier extends _$AppAccessModeNotifier {
     return mode;
   }
 
+  /// Sets the app access mode and persists it to SharedPreferences
   Future<void> setMode(AppAccessMode mode) async {
     logInfo('Switching app access mode to ${mode.name}');
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Dashboard screen showing overview statistics and today's sessions
 class DashboardScreen extends StatelessWidget {
+  /// Creates a new [DashboardScreen]
   const DashboardScreen({super.key});
 
   /// Route name for navigation

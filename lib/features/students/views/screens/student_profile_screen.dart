@@ -10,6 +10,7 @@ import 'package:tutor_zone/features/students/views/widgets/add_edit_student_dial
 
 /// Student profile screen showing details and session history
 class StudentProfileScreen extends ConsumerWidget {
+  /// Creates a new [StudentProfileScreen] for the given student
   const StudentProfileScreen({
     required this.studentId,
     super.key,

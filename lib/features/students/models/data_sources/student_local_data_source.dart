@@ -17,6 +17,7 @@ StudentLocalDataSource studentLocalDataSource(Ref ref) {
 class StudentLocalDataSource {
   final Database _db;
 
+  /// Creates a new [StudentLocalDataSource] with the given database.
   StudentLocalDataSource(this._db);
 
   /// Create a new student

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Session timer screen for tracking live tutoring sessions
 class SessionTimerScreen extends StatelessWidget {
+  /// Creates a new [SessionTimerScreen]
   const SessionTimerScreen({super.key});
 
   /// Route name for navigation

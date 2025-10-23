@@ -7,8 +7,10 @@ import 'package:tutor_zone/features/students/models/data/student.dart';
 
 /// Dialog for adding or editing a student
 class AddEditStudentDialog extends ConsumerStatefulWidget {
-  final Student? student; // null = add mode, non-null = edit mode
+  /// Student to edit (null = add mode, non-null = edit mode)
+  final Student? student;
 
+  /// Creates a new [AddEditStudentDialog] with optional student to edit
   const AddEditStudentDialog({super.key, this.student});
 
   @override

@@ -18,6 +18,7 @@ RecurringScheduleLocalDataSource recurringScheduleLocalDataSource(Ref ref) {
 class RecurringScheduleLocalDataSource {
   final Database _db;
 
+  /// Creates a new [RecurringScheduleLocalDataSource] with the given database.
   RecurringScheduleLocalDataSource(this._db);
 
   /// Create a new recurring schedule

@@ -14,6 +14,7 @@ part 'balance_change.g.dart';
 abstract class BalanceChange with _$BalanceChange {
   const BalanceChange._();
 
+  /// Creates a new [BalanceChange] instance.
   const factory BalanceChange({
     /// Unique identifier (UUID)
     required String id,

@@ -13,6 +13,7 @@ part 'recurring_schedule.g.dart';
 abstract class RecurringSchedule with _$RecurringSchedule {
   const RecurringSchedule._();
 
+  /// Creates a new [RecurringSchedule] instance.
   const factory RecurringSchedule({
     /// Unique identifier (UUID)
     required String id,

@@ -4,16 +4,22 @@ part 'session.g.dart';
 
 /// Attendance status for a session
 enum SessionAttendance {
+  /// Session was completed
   @JsonValue('completed')
   completed,
+
+  /// Session was skipped/cancelled
   @JsonValue('skipped')
   skipped,
 }
 
 /// Payment status for a session
 enum PaymentStatus {
+  /// Session has been paid
   @JsonValue('paid')
   paid,
+
+  /// Session is unpaid
   @JsonValue('unpaid')
   unpaid,
 }
@@ -28,6 +34,7 @@ enum PaymentStatus {
 abstract class Session with _$Session {
   const Session._();
 
+  /// Creates a new [Session] instance.
   const factory Session({
     /// Unique identifier (UUID)
     required String id,

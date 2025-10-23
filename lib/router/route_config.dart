@@ -14,6 +14,7 @@ part 'route_config.freezed.dart';
 abstract class AppRoute with _$AppRoute {
   const AppRoute._();
 
+  /// Creates a new [AppRoute] with the given configuration
   const factory AppRoute({
     /// Route name for named navigation
     required String name,
@@ -49,41 +50,51 @@ class Routes {
   Routes._();
 
   // ==================== Auth ====================
+
+  /// Sign in route
   static const signIn = AppRoute(
     name: 'sign-in',
     path: '/sign-in',
     requiresAuth: false,
   );
 
+  /// Sign up route
   static const signUp = AppRoute(
     name: 'sign-up',
     path: '/sign-up',
     requiresAuth: false,
   );
 
+  /// Forgot password route
   static const forgotPassword = AppRoute(
     name: 'forgot-password',
     path: '/forgot-password',
     requiresAuth: false,
   );
 
+  /// User profile route
   static const profile = AppRoute(
     name: 'profile',
     path: '/profile',
   );
 
   // ==================== Dashboard ====================
+
+  /// Dashboard route
   static const dashboard = AppRoute(
     name: 'dashboard',
     path: '/dashboard',
   );
 
   // ==================== Students ====================
+
+  /// Students list route
   static const students = AppRoute(
     name: 'students',
     path: '/students',
   );
 
+  /// Student profile route (with ID parameter)
   static const studentProfile = AppRoute(
     name: 'student-profile',
     path: ':id', // Relative path under /students
@@ -91,30 +102,40 @@ class Routes {
   );
 
   // ==================== Timer ====================
+
+  /// Timer route
   static const timer = AppRoute(
     name: 'timer',
     path: '/timer',
   );
 
   // ==================== Payments ====================
+
+  /// Payments route
   static const payments = AppRoute(
     name: 'payments',
     path: '/payments',
   );
 
   // ==================== Reports ====================
+
+  /// Reports route
   static const reports = AppRoute(
     name: 'reports',
     path: '/reports',
   );
 
   // ==================== Settings ====================
+
+  /// Settings route
   static const settings = AppRoute(
     name: 'settings',
     path: '/settings',
   );
 
   // ==================== Error ====================
+
+  /// Not found (404) route
   static const notFound = AppRoute(
     name: 'not-found',
     path: '/404',
@@ -172,6 +193,7 @@ class RouteGroups {
 /// Route navigation items for UI rendering
 @freezed
 abstract class NavigationItem with _$NavigationItem {
+  /// Creates a new [NavigationItem] with the given configuration
   const factory NavigationItem({
     required String label,
     required AppRoute route,

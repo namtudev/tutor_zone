@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Monthly summary screen with charts and analytics
 class MonthlySummaryScreen extends StatelessWidget {
+  /// Creates a new [MonthlySummaryScreen]
   const MonthlySummaryScreen({super.key});
 
   /// Route name for navigation

@@ -6,8 +6,10 @@ import 'package:tutor_zone/features/students/controllers/students_controller.dar
 
 /// Dialog for logging a new session
 class LogSessionDialog extends ConsumerStatefulWidget {
-  final String? studentId; // Pre-select student if provided
+  /// Pre-select student if provided
+  final String? studentId;
 
+  /// Creates a new [LogSessionDialog] with optional student ID
   const LogSessionDialog({super.key, this.studentId});
 
   @override

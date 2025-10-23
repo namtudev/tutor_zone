@@ -3,20 +3,36 @@
 class RoutePath {
   RoutePath._();
 
-  // Auth routes
+  /// Sign in route path
   static const String signIn = '/sign-in';
+
+  /// Sign up route path
   static const String signUp = '/sign-up';
+
+  /// Forgot password route path
   static const String forgotPassword = '/forgot-password';
+
+  /// Profile route path
   static const String profile = '/profile';
 
-  // Main routes
+  /// Dashboard route path
   static const String dashboard = '/dashboard';
+
+  /// Students route path
   static const String students = '/students';
+
+  /// Timer route path
   static const String timer = '/timer';
+
+  /// Payments route path
   static const String payments = '/payments';
+
+  /// Reports route path
   static const String reports = '/reports';
+
+  /// Settings route path
   static const String settings = '/settings';
 
-  // Error routes
+  /// Not found (404) route path
   static const String notFound = '/404';
 }

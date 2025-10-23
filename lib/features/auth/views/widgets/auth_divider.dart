@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 /// Divider with text for separating authentication methods
 /// Typically used to separate email/password from social sign-in
 class AuthDivider extends StatelessWidget {
+  /// Creates a new [AuthDivider]
   const AuthDivider({
     this.text = 'OR',
     super.key,
   });
 
+  /// Divider text
   final String text;
 
   @override

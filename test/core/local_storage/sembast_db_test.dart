@@ -1,5 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:sembast/sembast.dart';
+import 'package:flutter_test/flutter_test.dart' hide Finder;
 import 'package:sembast/sembast_memory.dart';
 import 'package:tutor_zone/core/local_storage/sembast_db.dart';
 
@@ -134,8 +133,8 @@ void main() {
     });
 
     test('should support transactions for atomic updates', () async {
-      final studentId = 'student-txn-test';
-      final sessionId = 'session-txn-test';
+      const studentId = 'student-txn-test';
+      const sessionId = 'session-txn-test';
 
       // Create student and session in a transaction
       await testDb.transaction((txn) async {

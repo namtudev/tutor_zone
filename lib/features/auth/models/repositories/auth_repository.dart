@@ -28,6 +28,7 @@ AuthUser? currentUser(Ref ref) {
 /// Authentication repository
 /// Handles all Firebase Authentication operations
 class AuthRepository {
+  /// Creates a new [AuthRepository] with the given Firebase Auth instance
   AuthRepository(this._firebaseAuth);
 
   final firebase_auth.FirebaseAuth _firebaseAuth;

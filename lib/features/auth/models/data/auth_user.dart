@@ -10,6 +10,7 @@ part 'auth_user.g.dart';
 abstract class AuthUser with _$AuthUser {
   const AuthUser._();
 
+  /// Creates a new [AuthUser] instance
   const factory AuthUser({
     required String uid,
     String? email,
@@ -31,6 +32,7 @@ abstract class AuthUser with _$AuthUser {
     );
   }
 
+  /// Creates an [AuthUser] from JSON
   factory AuthUser.fromJson(Map<String, dynamic> json) =>
       _$AuthUserFromJson(json);
 }

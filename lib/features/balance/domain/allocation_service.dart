@@ -34,6 +34,7 @@ class AllocationService {
   final StudentLocalDataSource _studentDataSource;
   final SessionLocalDataSource _sessionDataSource;
 
+  /// Creates a new [AllocationService] with the given dependencies.
   AllocationService(this._db, this._studentDataSource, this._sessionDataSource);
 
   /// Run allocation check for a specific student.

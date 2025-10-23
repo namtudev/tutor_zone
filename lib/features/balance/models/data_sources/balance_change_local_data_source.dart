@@ -17,6 +17,7 @@ BalanceChangeLocalDataSource balanceChangeLocalDataSource(Ref ref) {
 class BalanceChangeLocalDataSource {
   final Database _db;
 
+  /// Creates a new [BalanceChangeLocalDataSource] with the given database.
   BalanceChangeLocalDataSource(this._db);
 
   /// Create a new balance change

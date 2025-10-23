@@ -7,6 +7,7 @@ import 'package:tutor_zone/features/students/views/widgets/add_edit_student_dial
 
 /// Students list screen with search, filter, and sort capabilities
 class StudentsListScreen extends ConsumerStatefulWidget {
+  /// Creates a new [StudentsListScreen]
   const StudentsListScreen({super.key});
 
   /// Route name for navigation

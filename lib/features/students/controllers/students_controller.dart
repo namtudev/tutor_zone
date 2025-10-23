@@ -30,6 +30,7 @@ Stream<List<Student>> studentsWithNegativeBalanceStream(Ref ref) {
 }
 
 
+/// Controller for managing student operations
 @riverpod
 class StudentsController extends _$StudentsController {
   StudentRepository get _repository => ref.read(studentRepositoryProvider);
@@ -37,6 +38,7 @@ class StudentsController extends _$StudentsController {
   @override
   Future<void> build() async {}
 
+  /// Creates a new student with the given details
   Future<void> createStudent({
     required String name,
     required int hourlyRateCents,
@@ -56,6 +58,7 @@ class StudentsController extends _$StudentsController {
     });
   }
 
+  /// Updates an existing student with the given details
   Future<void> updateStudent({
     required String id,
     String? name,
@@ -82,6 +85,7 @@ class StudentsController extends _$StudentsController {
     });
   }
 
+  /// Deletes a student by ID
   Future<void> deleteStudent(String id) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {

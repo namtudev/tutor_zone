@@ -10,11 +10,13 @@ import 'package:tutor_zone/features/students/controllers/students_controller.dar
 
 /// Dialog for recording a payment from a student
 class RecordPaymentDialog extends ConsumerStatefulWidget {
+  /// Creates a new [RecordPaymentDialog] for the given student
   const RecordPaymentDialog({
     required this.studentId,
     super.key,
   });
 
+  /// Student ID for the payment
   final String studentId;
 
   @override

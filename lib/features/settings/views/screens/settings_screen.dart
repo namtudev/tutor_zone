@@ -6,6 +6,7 @@ import 'package:tutor_zone/router/route_config.dart';
 
 /// Settings screen for user preferences and configuration
 class SettingsScreen extends ConsumerWidget {
+  /// Creates a new [SettingsScreen]
   const SettingsScreen({super.key});
 
   /// Route name for navigation

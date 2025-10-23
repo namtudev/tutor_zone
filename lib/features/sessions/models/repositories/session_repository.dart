@@ -86,6 +86,7 @@ abstract class SessionRepository {
 class SessionRepositoryLocal implements SessionRepository {
   final SessionLocalDataSource _dataSource;
 
+  /// Creates a new [SessionRepositoryLocal] with the given data source.
   SessionRepositoryLocal(this._dataSource);
 
   @override

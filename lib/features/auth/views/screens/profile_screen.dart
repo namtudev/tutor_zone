@@ -7,6 +7,7 @@ import 'package:tutor_zone/router/route_path.dart';
 /// Profile screen using Firebase UI Auth
 /// Displays user profile and allows sign-out
 class ProfileScreen extends StatelessWidget {
+  /// Creates a new [ProfileScreen]
   const ProfileScreen({super.key});
 
   @override

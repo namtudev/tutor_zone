@@ -8,6 +8,7 @@ import 'package:tutor_zone/router/app_router.dart';
 
 /// Main application widget with Riverpod integration
 class App extends ConsumerWidget {
+  /// Creates the main [App] widget.
   const App({super.key});
 
   @override

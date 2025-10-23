@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 /// Google Sign-In button using OAuthProviderButton
 /// Uses GoogleProvider from firebase_ui_oauth_google
 class GoogleSignInButton extends StatelessWidget {
+  /// Creates a new [GoogleSignInButton]
   const GoogleSignInButton({
     super.key,
   });
