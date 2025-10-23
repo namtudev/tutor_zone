@@ -47,7 +47,7 @@ Stream<List<Session>> unpaidSessionsStream(Ref ref) {
 /// Controller for session CRUD operations with UI-bindable state.
 @riverpod
 class SessionsController extends _$SessionsController {
-  late final SessionRepository _repository;
+  SessionRepository get _repository => ref.read(sessionRepositoryProvider);
 
   @override
   Future<void> build() async {}
