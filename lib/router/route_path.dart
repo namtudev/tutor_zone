@@ -24,8 +24,8 @@ class RoutePath {
   /// Timer route path
   static const String timer = '/timer';
 
-  /// Payments route path
-  static const String payments = '/payments';
+  /// Balance route path
+  static const String balance = '/balance';
 
   /// Reports route path
   static const String reports = '/reports';

@@ -8,9 +8,9 @@ import 'package:tutor_zone/features/auth/views/screens/forgot_password_screen.da
 import 'package:tutor_zone/features/auth/views/screens/profile_screen.dart';
 import 'package:tutor_zone/features/auth/views/screens/sign_in_screen.dart';
 import 'package:tutor_zone/features/auth/views/screens/sign_up_screen.dart';
+import 'package:tutor_zone/features/balance/views/screens/balance_screen.dart';
 import 'package:tutor_zone/features/dashboard/views/screens/dashboard_screen.dart';
 import 'package:tutor_zone/features/home/views/screens/main_shell_screen.dart';
-import 'package:tutor_zone/features/payments/views/screens/payments_screen.dart';
 import 'package:tutor_zone/features/reports/views/screens/monthly_summary_screen.dart';
 import 'package:tutor_zone/features/settings/views/screens/settings_screen.dart';
 import 'package:tutor_zone/features/students/views/screens/student_profile_screen.dart';
@@ -43,9 +43,9 @@ final _timerNavKey = GlobalKey<NavigatorState>(
   debugLabel: 'timer',
 );
 
-/// Navigator key for the payments branch
-final _paymentsNavKey = GlobalKey<NavigatorState>(
-  debugLabel: 'payments',
+/// Navigator key for the balance branch
+final _balanceNavKey = GlobalKey<NavigatorState>(
+  debugLabel: 'balance',
 );
 
 /// Navigator key for the reports branch
@@ -220,16 +220,16 @@ GoRouter router(Ref ref) {
             ],
           ),
 
-          // ==================== Branch 3: Payments ====================
+          // ==================== Branch 3: Balance ====================
           StatefulShellBranch(
-            navigatorKey: _paymentsNavKey,
+            navigatorKey: _balanceNavKey,
             routes: [
               GoRoute(
-                path: Routes.payments.path,
-                name: Routes.payments.name,
+                path: Routes.balance.path,
+                name: Routes.balance.name,
                 pageBuilder: (context, state) => NoTransitionPage(
                   key: state.pageKey,
-                  child: const PaymentsScreen(),
+                  child: const BalanceScreen(),
                 ),
               ),
             ],

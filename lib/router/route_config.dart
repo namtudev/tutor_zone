@@ -109,12 +109,12 @@ class Routes {
     path: '/timer',
   );
 
-  // ==================== Payments ====================
+  // ==================== Balance ====================
 
-  /// Payments route
-  static const payments = AppRoute(
-    name: 'payments',
-    path: '/payments',
+  /// Balance route
+  static const balance = AppRoute(
+    name: 'balance',
+    path: '/balance',
   );
 
   // ==================== Reports ====================
@@ -152,7 +152,7 @@ class Routes {
     students,
     studentProfile,
     timer,
-    payments,
+    balance,
     reports,
     settings,
     notFound,
@@ -168,7 +168,7 @@ class RouteGroups {
     Routes.dashboard,
     Routes.students,
     Routes.timer,
-    Routes.payments,
+    Routes.balance,
     Routes.reports,
     Routes.settings,
   ]);
@@ -227,10 +227,10 @@ class NavigationConfig {
       selectedIcon: 'timer',
     ),
     NavigationItem(
-      label: 'Payments',
-      route: Routes.payments,
-      icon: 'payments_outlined',
-      selectedIcon: 'payments',
+      label: 'Balance',
+      route: Routes.balance,
+      icon: 'account_balance_wallet_outlined',
+      selectedIcon: 'account_balance_wallet',
     ),
     NavigationItem(
       label: 'Reports',

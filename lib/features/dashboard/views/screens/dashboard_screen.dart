@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tutor_zone/core/common_widgets/fixed_height_delegate.dart';
+import 'package:tutor_zone/features/balance/views/widgets/record_payment_dialog.dart';
 import 'package:tutor_zone/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:tutor_zone/features/dashboard/models/dashboard_stats.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
+import 'package:tutor_zone/features/sessions/views/widgets/log_session_dialog.dart';
+import 'package:tutor_zone/features/students/views/widgets/add_edit_student_dialog.dart';
 
 /// Dashboard screen showing overview statistics and today's sessions
 class DashboardScreen extends ConsumerWidget {
@@ -65,15 +68,46 @@ class DashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
 
                 // Quick Actions
-                Text('QUICK ACTIONS', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                Text(
+                  'QUICK ACTIONS',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                ),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: [
-                    _QuickActionButton(icon: Icons.person_add, label: 'Add Student', onPressed: () {}),
-                    _QuickActionButton(icon: Icons.timer, label: 'Start Timer', onPressed: () {}),
-                    _QuickActionButton(icon: Icons.note_add, label: 'Log Session', onPressed: () {}),
+                    _QuickActionButton(
+                      icon: Icons.person_add,
+                      label: 'Add Student',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const AddEditStudentDialog(),
+                        );
+                      },
+                    ),
+                    _QuickActionButton(
+                      icon: Icons.note_add,
+                      label: 'Log Session',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const LogSessionDialog(),
+                        );
+                      },
+                    ),
+                    _QuickActionButton(
+                      icon: Icons.payments_outlined,
+                      label: 'Log Payment',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const RecordPaymentDialog(studentId: '',),
+                        );
+
+                      },
+                    ),
                   ],
                 ),
 

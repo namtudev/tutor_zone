@@ -56,15 +56,13 @@ Future<int> totalPaymentsByStudent(Ref ref, String studentId) async {
 /// Controller for balance change CRUD operations with UI-bindable state.
 @riverpod
 class BalanceController extends _$BalanceController {
-  late final BalanceChangeRepository _balanceChangeRepo;
-  late final StudentRepository _studentRepo;
-  late final LedgerRepository _ledgerRepo;
+  BalanceChangeRepository get _balanceChangeRepo => ref.read(balanceChangeRepositoryProvider);
+  StudentRepository _studentRepo() => ref.read(studentRepositoryProvider);
+  LedgerRepository get _ledgerRepo => ref.read(ledgerRepositoryProvider);
 
   @override
   Future<void> build() async {
-    _balanceChangeRepo = ref.read(balanceChangeRepositoryProvider);
-    _studentRepo = ref.read(studentRepositoryProvider);
-    _ledgerRepo = ref.read(ledgerRepositoryProvider);
+
   }
 
   /// Record a payment (positive balance change)
@@ -85,24 +83,24 @@ class BalanceController extends _$BalanceController {
       );
 
       logInfo('Recording payment: ${balanceChange.id} for student $studentId, amount: \$${balanceChange.amountDollars}');
-      await _balanceChangeRepo.create(balanceChange);
+       _balanceChangeRepo.create(balanceChange);
 
       // Update student balance
-      final student = await _studentRepo.getById(studentId);
+      final student = await _studentRepo().getById(studentId);
       if (student != null) {
         final newBalance = student.balanceCents + amountCents;
-        await _studentRepo.updateBalance(studentId, newBalance);
+        await _studentRepo().updateBalance(studentId, newBalance);
         logInfo('Updated student balance: $newBalance cents');
       }
 
       logInfo('Payment recorded successfully: ${balanceChange.id}');
 
-      // Trigger allocation check
-      final allocationService = ref.read(allocationServiceProvider);
-      final allocated = await allocationService.runAllocationAfterBalanceChange(studentId);
-      if (allocated) {
-        logInfo('Auto-allocation performed for student $studentId');
-      }
+      // // Trigger allocation check
+      // final allocationService = ref.read(allocationServiceProvider);
+      // final allocated = await allocationService.runAllocationAfterBalanceChange(studentId);
+      // if (allocated) {
+      //   logInfo('Auto-allocation performed for student $studentId');
+      // }
     });
   }
 
@@ -127,10 +125,10 @@ class BalanceController extends _$BalanceController {
       await _balanceChangeRepo.create(balanceChange);
 
       // Update student balance
-      final student = await _studentRepo.getById(studentId);
+      final student = await _studentRepo().getById(studentId);
       if (student != null) {
         final newBalance = student.balanceCents + amountCents;
-        await _studentRepo.updateBalance(studentId, newBalance);
+        await _studentRepo().updateBalance(studentId, newBalance);
         logInfo('Updated student balance: $newBalance cents');
       }
 
@@ -156,11 +154,11 @@ class BalanceController extends _$BalanceController {
       // Get the balance change to reverse the student balance
       final balanceChange = await _balanceChangeRepo.getById(id);
       if (balanceChange != null) {
-        final student = await _studentRepo.getById(balanceChange.studentId);
+        final student = await _studentRepo().getById(balanceChange.studentId);
         if (student != null) {
           // Reverse the balance change
           final newBalance = student.balanceCents - balanceChange.amountCents;
-          await _studentRepo.updateBalance(balanceChange.studentId, newBalance);
+          await _studentRepo().updateBalance(balanceChange.studentId, newBalance);
           logInfo('Reversed student balance: $newBalance cents');
         }
       }

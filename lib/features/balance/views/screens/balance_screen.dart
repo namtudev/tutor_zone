@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import 'package:tutor_zone/features/payments/views/widgets/record_payment_dialog.dart';
+import 'package:tutor_zone/features/balance/views/widgets/record_payment_dialog.dart';
 import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
 import 'package:tutor_zone/features/students/controllers/students_controller.dart';
 
-/// Payments and balances screen showing unpaid sessions and student balances
-class PaymentsScreen extends ConsumerWidget {
-  /// Creates a new [PaymentsScreen]
-  const PaymentsScreen({super.key});
+/// Balance screen showing unpaid sessions and student balances.
+///
+/// This screen provides a financial overview by combining data from multiple sources:
+/// - Unpaid sessions (SessionsController)
+/// - Student balances (StudentsController)
+/// - Payment recording (BalanceController via RecordPaymentDialog)
+class BalanceScreen extends ConsumerWidget {
+  /// Creates a new [BalanceScreen]
+  const BalanceScreen({super.key});
 
   /// Route name for navigation
-  static const String routeName = 'payments';
+  static const String routeName = 'balance';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

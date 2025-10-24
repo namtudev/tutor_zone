@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
+import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/balance/controllers/balance_controller.dart';
 import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
@@ -27,17 +28,13 @@ class RecordPaymentDialog extends ConsumerStatefulWidget {
 class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
-  final _notesController = TextEditingController();
 
   String _paymentType = 'prepaid'; // 'prepaid' or 'adjustment'
   DateTime _paymentDate = DateTime.now();
-  String? _paymentMethod;
-  bool _isSubmitting = false;
 
   @override
   void dispose() {
     _amountController.dispose();
-    _notesController.dispose();
     super.dispose();
   }
 
@@ -45,6 +42,8 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
   Widget build(BuildContext context) {
     final studentAsync = ref.watch(studentStreamProvider(widget.studentId));
     final sessionsAsync = ref.watch(sessionsByStudentStreamProvider(widget.studentId));
+    final balanceAsync = ref.watch(balanceControllerProvider);
+    final isSubmitting = balanceAsync.isLoading;
     return studentAsync.when(
       data: (student) {
         if (student == null) {
@@ -107,7 +106,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.close),
-                              onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                              onPressed: isSubmitting ? null : () => Navigator.of(context).pop(),
                             ),
                           ],
                         ),
@@ -198,7 +197,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                                   ),
                                 ],
                                 selected: {_paymentType},
-                                onSelectionChanged: _isSubmitting
+                                onSelectionChanged: isSubmitting
                                     ? null
                                     : (value) {
                                         setState(() {
@@ -217,7 +216,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                               const SizedBox(height: 12),
                               TextFormField(
                                 controller: _amountController,
-                                enabled: !_isSubmitting,
+                                enabled: !isSubmitting,
                                 decoration: InputDecoration(
                                   labelText: _paymentType == 'prepaid' ? 'Payment Amount' : 'Adjustment Amount',
                                   hintText: _paymentType == 'prepaid' ? 'Enter positive amount' : 'Enter amount (+ or -)',
@@ -268,7 +267,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                                 controller: TextEditingController(
                                   text: DateFormat('MMM d, yyyy').format(_paymentDate),
                                 ),
-                                onTap: _isSubmitting
+                                onTap: isSubmitting
                                     ? null
                                     : () async {
                                         final date = await showDatePicker(
@@ -286,41 +285,6 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                               ),
 
                               const SizedBox(height: 16),
-
-                              // Payment Method
-                              DropdownMenu<String>(
-                                label: const Text('Payment Method (optional)'),
-                                expandedInsets: EdgeInsets.zero,
-                                enabled: !_isSubmitting,
-                                initialSelection: _paymentMethod,
-                                onSelected: (value) {
-                                  setState(() {
-                                    _paymentMethod = value;
-                                  });
-                                },
-                                dropdownMenuEntries: const [
-                                  DropdownMenuEntry(value: 'cash', label: 'Cash'),
-                                  DropdownMenuEntry(value: 'check', label: 'Check'),
-                                  DropdownMenuEntry(value: 'venmo', label: 'Venmo'),
-                                  DropdownMenuEntry(value: 'paypal', label: 'PayPal'),
-                                  DropdownMenuEntry(value: 'zelle', label: 'Zelle'),
-                                ],
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // Notes
-                              TextFormField(
-                                controller: _notesController,
-                                enabled: !_isSubmitting,
-                                decoration: InputDecoration(
-                                  labelText: 'Notes (optional)',
-                                  border: const OutlineInputBorder(),
-                                  filled: true,
-                                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                                ),
-                                maxLines: 2,
-                              ),
                             ],
                           ),
                         ),
@@ -341,13 +305,13 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
-                              onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                              onPressed: isSubmitting ? null : () => Navigator.of(context).pop(),
                               child: const Text('Cancel'),
                             ),
                             const SizedBox(width: 12),
                             FilledButton(
-                              onPressed: _isSubmitting ? null : _handleSubmit,
-                              child: _isSubmitting
+                              onPressed: isSubmitting ? null : _handleSubmit,
+                              child: isSubmitting
                                   ? const SizedBox(
                                       width: 20,
                                       height: 20,
@@ -423,28 +387,27 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
     );
   }
 
+
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-    });
-
     try {
       final amountDollars = double.parse(_amountController.text);
       final amountCents = (amountDollars * 100).round();
 
-      final controller = ref.read(balanceControllerProvider.notifier);
+      // Read ref BEFORE any async operations
+      final balanceController = ref.read(balanceControllerProvider.notifier);
 
       if (_paymentType == 'prepaid') {
-        await controller.recordPayment(
+        logInfo('Recording payment for student ${widget.studentId}, amount: \$$amountDollars');
+        await balanceController.recordPayment(
           studentId: widget.studentId,
           amountCents: amountCents,
         );
       } else {
-        await controller.recordAdjustment(
+        await balanceController.recordAdjustment(
           studentId: widget.studentId,
           amountCents: amountCents,
         );
@@ -456,13 +419,10 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
           _paymentType == 'prepaid' ? 'Payment recorded successfully' : 'Adjustment recorded successfully',
         );
       }
-    } catch (e) {
+    } catch (e, stack) {
+      logError('Failed to record payment', e, stack);
       if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
         context.showErrorSnackBar('Error: $e');
       }
     }
-  }
-}
+  }}
