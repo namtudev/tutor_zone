@@ -539,9 +539,6 @@ class SettingsScreen extends ConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
 
-    // Capture navigator after async gap
-    final navigator = Navigator.of(context);
-
     try {
       // Show loading indicator
       showDialog(
@@ -570,16 +567,17 @@ class SettingsScreen extends ConsumerWidget {
 
       // Show success message
       if (context.mounted) {
+        // Close loading dialog if still open
+        Navigator.of(context, rootNavigator: true).pop();
         context.showSuccessSnackBar('Fake data loaded successfully');
       }
     } catch (e, stack) {
       logError('Failed to load fake data', e, stack);
 
-      // Close loading dialog if still open
-      navigator.pop();
-
       // Show error message
       if (context.mounted) {
+        // Close loading dialog if still open
+        Navigator.of(context, rootNavigator: true).pop();
         context.showErrorSnackBar('Failed to load fake data: $e');
       }
     }

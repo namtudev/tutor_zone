@@ -60,7 +60,6 @@ class SessionsController extends _$SessionsController {
     required int rateSnapshotCents,
     SessionAttendance attendance = SessionAttendance.completed,
     PaymentStatus payStatus = PaymentStatus.unpaid,
-    String? notes,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
@@ -89,7 +88,6 @@ class SessionsController extends _$SessionsController {
     required int rateSnapshotCents,
     SessionAttendance? attendance,
     PaymentStatus? payStatus,
-    String? notes,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {

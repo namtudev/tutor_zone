@@ -20,7 +20,6 @@ class LogSessionDialog extends ConsumerStatefulWidget {
 
 class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _notesController = TextEditingController();
 
   String? _selectedStudentId;
   DateTime? _selectedDate;
@@ -39,7 +38,6 @@ class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
 
   @override
   void dispose() {
-    _notesController.dispose();
     super.dispose();
   }
 
@@ -101,18 +99,6 @@ class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
 
                       // Session Details
                       Text('Session Details', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _notesController,
-                        decoration: InputDecoration(
-                          labelText: 'Session Notes',
-                          hintText: 'What did you work on during this session?',
-                          border: const OutlineInputBorder(),
-                          filled: true,
-                          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        ),
-                        maxLines: 4,
-                      ),
                       const SizedBox(height: 16),
                       Text('Payment Status', style: Theme.of(context).textTheme.labelLarge),
                       const SizedBox(height: 8),
@@ -391,7 +377,6 @@ class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
       end: end,
       rateSnapshotCents: student.hourlyRateCents,
       payStatus: _payStatus,
-      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
     );
 
     // Watch state to check result
