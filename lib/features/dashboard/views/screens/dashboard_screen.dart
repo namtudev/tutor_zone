@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tutor_zone/core/common_widgets/fixed_height_delegate.dart';
 
 /// Dashboard screen showing overview statistics and today's sessions
 class DashboardScreen extends StatelessWidget {
@@ -21,13 +22,15 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Statistics Cards
-              GridView.count(
-                crossAxisCount: crossAxisCount,
+              GridView(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  height: 150,
+                ),
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: isWide ? 2.5 : 3.5,
                 children: const [
                   _StatCard(title: 'THIS MONTH', value: '\$1,240', subtitle: '32 hours', icon: Icons.attach_money),
                   _StatCard(title: 'UNPAID', value: '\$320', subtitle: '8 sessions', icon: Icons.warning_amber_outlined, isWarning: true),
