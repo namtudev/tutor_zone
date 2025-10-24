@@ -45,6 +45,7 @@ AGENTS.md
 *.g.dart
 *.freezed.dart
 *.config.dart
+*.mocks.dart
 
 # Symbolication related
 app.*.symbols

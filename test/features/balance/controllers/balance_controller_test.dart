@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/balance/controllers/balance_controller.dart';
 import 'package:tutor_zone/features/balance/domain/allocation_service.dart';
@@ -10,11 +11,14 @@ import 'package:tutor_zone/features/balance/models/repositories/ledger_repositor
 import 'package:tutor_zone/features/students/models/data/student.dart';
 import 'package:tutor_zone/features/students/models/repositories/student_repository.dart';
 
-// Mock classes
-class MockBalanceChangeRepository extends Mock implements BalanceChangeRepository {}
-class MockStudentRepository extends Mock implements StudentRepository {}
-class MockLedgerRepository extends Mock implements LedgerRepository {}
-class MockAllocationService extends Mock implements AllocationService {}
+// Generate mocks using Mockito
+@GenerateNiceMocks([
+  MockSpec<BalanceChangeRepository>(),
+  MockSpec<StudentRepository>(),
+  MockSpec<LedgerRepository>(),
+  MockSpec<AllocationService>(),
+])
+import 'balance_controller_test.mocks.dart';
 
 void main() {
   group('BalanceController Tests', () {
@@ -27,13 +31,6 @@ void main() {
     setUpAll(() {
       // Initialize Talker for logging in tests
       initializeTalker();
-
-      // Register fallback values for any() matchers
-      registerFallbackValue(BalanceChange.payment(
-        id: 'fallback-id',
-        studentId: 'fallback-student-id',
-        amountCents: 1000,
-      ));
     });
 
     setUp(() {
@@ -72,16 +69,16 @@ void main() {
         // Arrange
         const studentId = 'student-1';
         const amountCents = 5000;
-        final student = createTestStudent(id: studentId, balanceCents: 0);
+        final student = createTestStudent();
 
-        when(() => mockBalanceChangeRepo.create(any())).thenAnswer((_) async => BalanceChange.payment(
+        when(mockBalanceChangeRepo.create(any)).thenAnswer((_) async => BalanceChange.payment(
           id: 'balance-1',
           studentId: studentId,
           amountCents: amountCents,
         ));
-        when(() => mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
-        when(() => mockStudentRepo.updateBalance(studentId, amountCents)).thenAnswer((_) async => {});
-        when(() => mockAllocationService.runAllocationAfterBalanceChange(studentId)).thenAnswer((_) async => false);
+        when(mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
+        when(mockStudentRepo.updateBalance(studentId, amountCents)).thenAnswer((_) async => {});
+        when(mockAllocationService.runAllocationAfterBalanceChange(studentId)).thenAnswer((_) async => false);
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -92,10 +89,10 @@ void main() {
         expect(state.hasError, false);
         expect(state.isLoading, false);
 
-        verify(() => mockBalanceChangeRepo.create(any(that: isA<BalanceChange>()))).called(1);
-        verify(() => mockStudentRepo.getById(studentId)).called(1);
-        verify(() => mockStudentRepo.updateBalance(studentId, amountCents)).called(1);
-        verify(() => mockAllocationService.runAllocationAfterBalanceChange(studentId)).called(1);
+        verify(mockBalanceChangeRepo.create(argThat(isA<BalanceChange>()))).called(1);
+        verify(mockStudentRepo.getById(studentId)).called(1);
+        verify(mockStudentRepo.updateBalance(studentId, amountCents)).called(1);
+        verify(mockAllocationService.runAllocationAfterBalanceChange(studentId)).called(1);
       });
 
       test('should throw error when payment amount is zero', () async {
@@ -112,8 +109,8 @@ void main() {
         expect(state.hasError, true);
         expect(state.error.toString(), contains('Payment amount must be positive'));
 
-        verifyNever(() => mockBalanceChangeRepo.create(any()));
-        verifyNever(() => mockStudentRepo.updateBalance(any(), any()));
+        verifyNever(mockBalanceChangeRepo.create(any));
+        verifyNever(mockStudentRepo.updateBalance(any, any));
       });
 
       test('should throw error when payment amount is negative', () async {
@@ -130,31 +127,31 @@ void main() {
         expect(state.hasError, true);
         expect(state.error.toString(), contains('Payment amount must be positive'));
 
-        verifyNever(() => mockBalanceChangeRepo.create(any()));
-        verifyNever(() => mockStudentRepo.updateBalance(any(), any()));
+        verifyNever(mockBalanceChangeRepo.create(any));
+        verifyNever(mockStudentRepo.updateBalance(any, any));
       });
 
       test('should trigger allocation after payment', () async {
         // Arrange
         const studentId = 'student-1';
         const amountCents = 5000;
-        final student = createTestStudent(id: studentId, balanceCents: 0);
+        final student = createTestStudent();
 
-        when(() => mockBalanceChangeRepo.create(any())).thenAnswer((_) async => BalanceChange.payment(
+        when(mockBalanceChangeRepo.create(any)).thenAnswer((_) async => BalanceChange.payment(
           id: 'balance-1',
           studentId: studentId,
           amountCents: amountCents,
         ));
-        when(() => mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
-        when(() => mockStudentRepo.updateBalance(studentId, amountCents)).thenAnswer((_) async => {});
-        when(() => mockAllocationService.runAllocationAfterBalanceChange(studentId)).thenAnswer((_) async => true);
+        when(mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
+        when(mockStudentRepo.updateBalance(studentId, amountCents)).thenAnswer((_) async => {});
+        when(mockAllocationService.runAllocationAfterBalanceChange(studentId)).thenAnswer((_) async => true);
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
         await controller.recordPayment(studentId: studentId, amountCents: amountCents);
 
         // Assert
-        verify(() => mockAllocationService.runAllocationAfterBalanceChange(studentId)).called(1);
+        verify(mockAllocationService.runAllocationAfterBalanceChange(studentId)).called(1);
       });
 
       test('should handle payment error gracefully', () async {
@@ -162,7 +159,7 @@ void main() {
         const studentId = 'student-1';
         const amountCents = 5000;
 
-        when(() => mockBalanceChangeRepo.create(any())).thenThrow(Exception('Database error'));
+        when(mockBalanceChangeRepo.create(any)).thenThrow(Exception('Database error'));
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -180,16 +177,16 @@ void main() {
         // Arrange
         const studentId = 'student-1';
         const amountCents = 3000;
-        final student = createTestStudent(id: studentId, balanceCents: 0);
+        final student = createTestStudent();
 
-        when(() => mockBalanceChangeRepo.create(any())).thenAnswer((_) async => BalanceChange.create(
+        when(mockBalanceChangeRepo.create(any)).thenAnswer((_) async => BalanceChange.create(
           id: 'balance-1',
           studentId: studentId,
           amountCents: amountCents,
         ));
-        when(() => mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
-        when(() => mockStudentRepo.updateBalance(studentId, amountCents)).thenAnswer((_) async => {});
-        when(() => mockAllocationService.runAllocationAfterBalanceChange(studentId)).thenAnswer((_) async => false);
+        when(mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
+        when(mockStudentRepo.updateBalance(studentId, amountCents)).thenAnswer((_) async => {});
+        when(mockAllocationService.runAllocationAfterBalanceChange(studentId)).thenAnswer((_) async => false);
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -200,25 +197,25 @@ void main() {
         expect(state.hasError, false);
         expect(state.isLoading, false);
 
-        verify(() => mockBalanceChangeRepo.create(any(that: isA<BalanceChange>()))).called(1);
-        verify(() => mockStudentRepo.getById(studentId)).called(1);
-        verify(() => mockStudentRepo.updateBalance(studentId, amountCents)).called(1);
-        verify(() => mockAllocationService.runAllocationAfterBalanceChange(studentId)).called(1);
+        verify(mockBalanceChangeRepo.create(argThat(isA<BalanceChange>()))).called(1);
+        verify(mockStudentRepo.getById(studentId)).called(1);
+        verify(mockStudentRepo.updateBalance(studentId, amountCents)).called(1);
+        verify(mockAllocationService.runAllocationAfterBalanceChange(studentId)).called(1);
       });
 
       test('should record negative adjustment successfully', () async {
         // Arrange
         const studentId = 'student-1';
         const amountCents = -3000;
-        final student = createTestStudent(id: studentId, balanceCents: 5000);
+        final student = createTestStudent(balanceCents: 5000);
 
-        when(() => mockBalanceChangeRepo.create(any())).thenAnswer((_) async => BalanceChange.create(
+        when(mockBalanceChangeRepo.create(any)).thenAnswer((_) async => BalanceChange.create(
           id: 'balance-1',
           studentId: studentId,
           amountCents: amountCents,
         ));
-        when(() => mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
-        when(() => mockStudentRepo.updateBalance(studentId, 2000)).thenAnswer((_) async => {});
+        when(mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
+        when(mockStudentRepo.updateBalance(studentId, 2000)).thenAnswer((_) async => {});
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -229,11 +226,11 @@ void main() {
         expect(state.hasError, false);
         expect(state.isLoading, false);
 
-        verify(() => mockBalanceChangeRepo.create(any(that: isA<BalanceChange>()))).called(1);
-        verify(() => mockStudentRepo.getById(studentId)).called(1);
-        verify(() => mockStudentRepo.updateBalance(studentId, 2000)).called(1);
+        verify(mockBalanceChangeRepo.create(argThat(isA<BalanceChange>()))).called(1);
+        verify(mockStudentRepo.getById(studentId)).called(1);
+        verify(mockStudentRepo.updateBalance(studentId, 2000)).called(1);
         // Should NOT trigger allocation for negative adjustment
-        verifyNever(() => mockAllocationService.runAllocationAfterBalanceChange(any()));
+        verifyNever(mockAllocationService.runAllocationAfterBalanceChange(any));
       });
 
       test('should throw error when adjustment amount is zero', () async {
@@ -250,31 +247,31 @@ void main() {
         expect(state.hasError, true);
         expect(state.error.toString(), contains('Adjustment amount cannot be zero'));
 
-        verifyNever(() => mockBalanceChangeRepo.create(any()));
-        verifyNever(() => mockStudentRepo.updateBalance(any(), any()));
+        verifyNever(mockBalanceChangeRepo.create(any));
+        verifyNever(mockStudentRepo.updateBalance(any, any));
       });
 
       test('should trigger allocation only for positive adjustments', () async {
         // Arrange
         const studentId = 'student-1';
         const amountCents = 3000;
-        final student = createTestStudent(id: studentId, balanceCents: 0);
+        final student = createTestStudent();
 
-        when(() => mockBalanceChangeRepo.create(any())).thenAnswer((_) async => BalanceChange.create(
+        when(mockBalanceChangeRepo.create(any)).thenAnswer((_) async => BalanceChange.create(
           id: 'balance-1',
           studentId: studentId,
           amountCents: amountCents,
         ));
-        when(() => mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
-        when(() => mockStudentRepo.updateBalance(studentId, amountCents)).thenAnswer((_) async => {});
-        when(() => mockAllocationService.runAllocationAfterBalanceChange(studentId)).thenAnswer((_) async => true);
+        when(mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
+        when(mockStudentRepo.updateBalance(studentId, amountCents)).thenAnswer((_) async => {});
+        when(mockAllocationService.runAllocationAfterBalanceChange(studentId)).thenAnswer((_) async => true);
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
         await controller.recordAdjustment(studentId: studentId, amountCents: amountCents);
 
         // Assert
-        verify(() => mockAllocationService.runAllocationAfterBalanceChange(studentId)).called(1);
+        verify(mockAllocationService.runAllocationAfterBalanceChange(studentId)).called(1);
       });
     });
 
@@ -289,12 +286,12 @@ void main() {
           studentId: studentId,
           amountCents: amountCents,
         );
-        final student = createTestStudent(id: studentId, balanceCents: 5000);
+        final student = createTestStudent(balanceCents: 5000);
 
-        when(() => mockBalanceChangeRepo.getById(balanceChangeId)).thenAnswer((_) async => balanceChange);
-        when(() => mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
-        when(() => mockStudentRepo.updateBalance(studentId, 0)).thenAnswer((_) async => {});
-        when(() => mockBalanceChangeRepo.delete(balanceChangeId)).thenAnswer((_) async => {});
+        when(mockBalanceChangeRepo.getById(balanceChangeId)).thenAnswer((_) async => balanceChange);
+        when(mockStudentRepo.getById(studentId)).thenAnswer((_) async => student);
+        when(mockStudentRepo.updateBalance(studentId, 0)).thenAnswer((_) async => {});
+        when(mockBalanceChangeRepo.delete(balanceChangeId)).thenAnswer((_) async => {});
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -305,18 +302,18 @@ void main() {
         expect(state.hasError, false);
         expect(state.isLoading, false);
 
-        verify(() => mockBalanceChangeRepo.getById(balanceChangeId)).called(1);
-        verify(() => mockStudentRepo.getById(studentId)).called(1);
-        verify(() => mockStudentRepo.updateBalance(studentId, 0)).called(1);
-        verify(() => mockBalanceChangeRepo.delete(balanceChangeId)).called(1);
+        verify(mockBalanceChangeRepo.getById(balanceChangeId)).called(1);
+        verify(mockStudentRepo.getById(studentId)).called(1);
+        verify(mockStudentRepo.updateBalance(studentId, 0)).called(1);
+        verify(mockBalanceChangeRepo.delete(balanceChangeId)).called(1);
       });
 
       test('should handle deletion when balance change not found', () async {
         // Arrange
         const balanceChangeId = 'balance-1';
 
-        when(() => mockBalanceChangeRepo.getById(balanceChangeId)).thenAnswer((_) async => null);
-        when(() => mockBalanceChangeRepo.delete(balanceChangeId)).thenAnswer((_) async => {});
+        when(mockBalanceChangeRepo.getById(balanceChangeId)).thenAnswer((_) async => null);
+        when(mockBalanceChangeRepo.delete(balanceChangeId)).thenAnswer((_) async => {});
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -326,17 +323,17 @@ void main() {
         final state = container.read(balanceControllerProvider);
         expect(state.hasError, false);
 
-        verify(() => mockBalanceChangeRepo.getById(balanceChangeId)).called(1);
-        verify(() => mockBalanceChangeRepo.delete(balanceChangeId)).called(1);
-        verifyNever(() => mockStudentRepo.getById(any()));
-        verifyNever(() => mockStudentRepo.updateBalance(any(), any()));
+        verify(mockBalanceChangeRepo.getById(balanceChangeId)).called(1);
+        verify(mockBalanceChangeRepo.delete(balanceChangeId)).called(1);
+        verifyNever(mockStudentRepo.getById(any));
+        verifyNever(mockStudentRepo.updateBalance(any, any));
       });
 
       test('should handle deletion error gracefully', () async {
         // Arrange
         const balanceChangeId = 'balance-1';
 
-        when(() => mockBalanceChangeRepo.getById(balanceChangeId)).thenThrow(Exception('Database error'));
+        when(mockBalanceChangeRepo.getById(balanceChangeId)).thenThrow(Exception('Database error'));
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -354,7 +351,7 @@ void main() {
         // Arrange
         const studentId = 'student-1';
 
-        when(() => mockBalanceChangeRepo.deleteByStudentId(studentId)).thenAnswer((_) async => {});
+        when(mockBalanceChangeRepo.deleteByStudentId(studentId)).thenAnswer((_) async => {});
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -365,14 +362,14 @@ void main() {
         expect(state.hasError, false);
         expect(state.isLoading, false);
 
-        verify(() => mockBalanceChangeRepo.deleteByStudentId(studentId)).called(1);
+        verify(mockBalanceChangeRepo.deleteByStudentId(studentId)).called(1);
       });
 
       test('should handle deletion error gracefully', () async {
         // Arrange
         const studentId = 'student-1';
 
-        when(() => mockBalanceChangeRepo.deleteByStudentId(studentId)).thenThrow(Exception('Database error'));
+        when(mockBalanceChangeRepo.deleteByStudentId(studentId)).thenThrow(Exception('Database error'));
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -391,7 +388,7 @@ void main() {
         const studentId = 'student-1';
         const currentBalance = 8000;
 
-        when(() => mockLedgerRepo.calculateCurrentBalance(studentId)).thenAnswer((_) async => currentBalance);
+        when(mockLedgerRepo.calculateCurrentBalance(studentId)).thenAnswer((_) async => currentBalance);
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -399,7 +396,7 @@ void main() {
 
         // Assert
         expect(balance, currentBalance);
-        verify(() => mockLedgerRepo.calculateCurrentBalance(studentId)).called(1);
+        verify(mockLedgerRepo.calculateCurrentBalance(studentId)).called(1);
       });
 
       test('getUnpaidTotal should return unpaid sessions total', () async {
@@ -407,7 +404,7 @@ void main() {
         const studentId = 'student-1';
         const unpaidTotal = 12000;
 
-        when(() => mockLedgerRepo.getUnpaidTotal(studentId)).thenAnswer((_) async => unpaidTotal);
+        when(mockLedgerRepo.getUnpaidTotal(studentId)).thenAnswer((_) async => unpaidTotal);
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -415,7 +412,7 @@ void main() {
 
         // Assert
         expect(total, unpaidTotal);
-        verify(() => mockLedgerRepo.getUnpaidTotal(studentId)).called(1);
+        verify(mockLedgerRepo.getUnpaidTotal(studentId)).called(1);
       });
 
       test('getTotalPayments should return total payments', () async {
@@ -423,7 +420,7 @@ void main() {
         const studentId = 'student-1';
         const totalPayments = 20000;
 
-        when(() => mockLedgerRepo.getTotalPayments(studentId)).thenAnswer((_) async => totalPayments);
+        when(mockLedgerRepo.getTotalPayments(studentId)).thenAnswer((_) async => totalPayments);
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -431,7 +428,7 @@ void main() {
 
         // Assert
         expect(total, totalPayments);
-        verify(() => mockLedgerRepo.getTotalPayments(studentId)).called(1);
+        verify(mockLedgerRepo.getTotalPayments(studentId)).called(1);
       });
 
       test('getLedgerEntries should return ledger entries', () async {
@@ -439,7 +436,7 @@ void main() {
         const studentId = 'student-1';
         final ledgerEntries = <LedgerEntry>[];
 
-        when(() => mockLedgerRepo.getLedgerForStudentDescending(studentId)).thenAnswer((_) async => ledgerEntries);
+        when(mockLedgerRepo.getLedgerForStudentDescending(studentId)).thenAnswer((_) async => ledgerEntries);
 
         // Act
         final controller = container.read(balanceControllerProvider.notifier);
@@ -447,7 +444,7 @@ void main() {
 
         // Assert
         expect(entries, ledgerEntries);
-        verify(() => mockLedgerRepo.getLedgerForStudentDescending(studentId)).called(1);
+        verify(mockLedgerRepo.getLedgerForStudentDescending(studentId)).called(1);
       });
     });
   });

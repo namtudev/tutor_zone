@@ -1,31 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/balance/domain/allocation_service.dart';
 import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
 import 'package:tutor_zone/features/sessions/models/repositories/session_repository.dart';
 
-/// Mock SessionRepository
-class MockSessionRepository extends Mock implements SessionRepository {}
+import 'sessions_controller_test.mocks.dart';
 
-/// Mock AllocationService
-class MockAllocationService extends Mock implements AllocationService {}
+// Generate mocks
+@GenerateNiceMocks([
+  MockSpec<SessionRepository>(),
+  MockSpec<AllocationService>(),
+])
 
 void main() {
   setUpAll(() {
     initializeTalker();
-    // Register fallback values for mocktail
-    registerFallbackValue(
-      Session.create(
-        id: 'test-id',
-        studentId: 'student-1',
-        start: DateTime(2025, 1, 15, 10),
-        end: DateTime(2025, 1, 15, 11),
-        rateSnapshotCents: 5000,
-      ),
-    );
   });
 
   group('SessionsController Tests', () {
@@ -55,7 +48,7 @@ void main() {
           end: DateTime(2025, 1, 15, 11),
           rateSnapshotCents: 5000,
         );
-        when(() => mockRepository.create(any())).thenAnswer((_) async => session);
+        when(mockRepository.create(any)).thenAnswer((_) async => session);
 
         final controller = container.read(sessionsControllerProvider.notifier);
 
@@ -70,12 +63,12 @@ void main() {
         // Assert
         final state = container.read(sessionsControllerProvider);
         expect(state.hasError, false);
-        verify(() => mockRepository.create(any())).called(1);
+        verify(mockRepository.create(any)).called(1);
       });
 
       test('should handle creation error', () async {
         // Arrange
-        when(() => mockRepository.create(any()))
+        when(mockRepository.create(any))
             .thenThrow(Exception('Database error'));
 
         final controller = container.read(sessionsControllerProvider.notifier);
@@ -106,10 +99,10 @@ void main() {
           rateSnapshotCents: 5000,
         );
 
-        when(() => mockRepository.getById('session-1'))
+        when(mockRepository.getById('session-1'))
             .thenAnswer((_) async => existingSession);
-        when(() => mockRepository.update(any())).thenAnswer((_) async => existingSession);
-        when(() => mockAllocationService.runAllocationAfterSessionSave(any()))
+        when(mockRepository.update(any)).thenAnswer((_) async => existingSession);
+        when(mockAllocationService.runAllocationAfterSessionSave(any))
             .thenAnswer((_) async => false);
 
         final controller = container.read(sessionsControllerProvider.notifier);
@@ -126,12 +119,12 @@ void main() {
         // Assert
         final state = container.read(sessionsControllerProvider);
         expect(state.hasError, false);
-        verify(() => mockRepository.update(any())).called(1);
+        verify(mockRepository.update(any)).called(1);
       });
 
       test('should throw when session not found', () async {
         // Arrange
-        when(() => mockRepository.getById('session-1'))
+        when(mockRepository.getById('session-1'))
             .thenAnswer((_) async => null);
 
         final controller = container.read(sessionsControllerProvider.notifier);
@@ -155,7 +148,7 @@ void main() {
     group('deleteSession', () {
       test('should delete session successfully', () async {
         // Arrange
-        when(() => mockRepository.delete('session-1'))
+        when(mockRepository.delete('session-1'))
             .thenAnswer((_) async {});
 
         final controller = container.read(sessionsControllerProvider.notifier);
@@ -166,7 +159,7 @@ void main() {
         // Assert
         final state = container.read(sessionsControllerProvider);
         expect(state.hasError, false);
-        verify(() => mockRepository.delete('session-1')).called(1);
+        verify(mockRepository.delete('session-1')).called(1);
       });
     });
 
@@ -181,9 +174,9 @@ void main() {
           rateSnapshotCents: 5000,
         );
 
-        when(() => mockRepository.getById('session-1'))
+        when(mockRepository.getById('session-1'))
             .thenAnswer((_) async => session);
-        when(() => mockRepository.update(any())).thenAnswer((_) async => session);
+        when(mockRepository.update(any)).thenAnswer((_) async => session);
 
         final controller = container.read(sessionsControllerProvider.notifier);
 
@@ -193,12 +186,12 @@ void main() {
         // Assert
         final state = container.read(sessionsControllerProvider);
         expect(state.hasError, false);
-        verify(() => mockRepository.update(any())).called(1);
+        verify(mockRepository.update(any)).called(1);
       });
 
       test('should throw when session not found', () async {
         // Arrange
-        when(() => mockRepository.getById('session-1'))
+        when(mockRepository.getById('session-1'))
             .thenAnswer((_) async => null);
 
         final controller = container.read(sessionsControllerProvider.notifier);
@@ -225,9 +218,9 @@ void main() {
           payStatus: PaymentStatus.paid,
         );
 
-        when(() => mockRepository.getById('session-1'))
+        when(mockRepository.getById('session-1'))
             .thenAnswer((_) async => session);
-        when(() => mockRepository.update(any())).thenAnswer((_) async => session);
+        when(mockRepository.update(any)).thenAnswer((_) async => session);
 
         final controller = container.read(sessionsControllerProvider.notifier);
 
@@ -237,7 +230,7 @@ void main() {
         // Assert
         final state = container.read(sessionsControllerProvider);
         expect(state.hasError, false);
-        verify(() => mockRepository.update(any())).called(1);
+        verify(mockRepository.update(any)).called(1);
       });
     });
 
@@ -252,9 +245,9 @@ void main() {
           rateSnapshotCents: 5000,
         );
 
-        when(() => mockRepository.getById('session-1'))
+        when(mockRepository.getById('session-1'))
             .thenAnswer((_) async => session);
-        when(() => mockRepository.update(any())).thenAnswer((_) async => session);
+        when(mockRepository.update(any)).thenAnswer((_) async => session);
 
         final controller = container.read(sessionsControllerProvider.notifier);
 
@@ -264,7 +257,7 @@ void main() {
         // Assert
         final state = container.read(sessionsControllerProvider);
         expect(state.hasError, false);
-        verify(() => mockRepository.update(any())).called(1);
+        verify(mockRepository.update(any)).called(1);
       });
     });
 
@@ -279,9 +272,9 @@ void main() {
           rateSnapshotCents: 5000,
         );
 
-        when(() => mockRepository.getById('session-1'))
+        when(mockRepository.getById('session-1'))
             .thenAnswer((_) async => session);
-        when(() => mockRepository.update(any())).thenAnswer((_) async => session);
+        when(mockRepository.update(any)).thenAnswer((_) async => session);
 
         final controller = container.read(sessionsControllerProvider.notifier);
 
@@ -291,7 +284,7 @@ void main() {
         // Assert
         final state = container.read(sessionsControllerProvider);
         expect(state.hasError, false);
-        verify(() => mockRepository.update(any())).called(1);
+        verify(mockRepository.update(any)).called(1);
       });
     });
   });
