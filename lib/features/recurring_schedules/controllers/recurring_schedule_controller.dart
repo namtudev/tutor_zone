@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data/recurring_schedule.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/repositories/recurring_schedule_repository.dart';
 import 'package:tutor_zone/features/sessions/domain/session_generation_service.dart';
-import 'package:tutor_zone/features/sessions/models/data/recurring_schedule.dart';
-import 'package:tutor_zone/features/sessions/models/data_sources/recurring_schedule_local_data_source.dart';
 import 'package:uuid/uuid.dart';
 
 part 'recurring_schedule_controller.g.dart';
@@ -12,8 +12,8 @@ const _uuid = Uuid();
 /// Stream provider for all recurring schedules
 @riverpod
 Stream<List<RecurringSchedule>> recurringSchedulesStream(Ref ref) {
-  final dataSource = ref.watch(recurringScheduleLocalDataSourceProvider);
-  return dataSource.watchAll();
+  final repository = ref.watch(recurringScheduleRepositoryProvider);
+  return repository.watchAll();
 }
 
 /// Stream provider for recurring schedules by student ID
@@ -22,15 +22,15 @@ Stream<List<RecurringSchedule>> recurringSchedulesByStudentStream(
   Ref ref,
   String studentId,
 ) {
-  final dataSource = ref.watch(recurringScheduleLocalDataSourceProvider);
-  return dataSource.watchByStudentId(studentId);
+  final repository = ref.watch(recurringScheduleRepositoryProvider);
+  return repository.watchByStudentId(studentId);
 }
 
 /// Stream provider for active recurring schedules
 @riverpod
 Stream<List<RecurringSchedule>> activeRecurringSchedulesStream(Ref ref) {
-  final dataSource = ref.watch(recurringScheduleLocalDataSourceProvider);
-  return dataSource.watchActive();
+  final repository = ref.watch(recurringScheduleRepositoryProvider);
+  return repository.watchActive();
 }
 
 /// Stream provider for active recurring schedules by student ID
@@ -39,8 +39,8 @@ Stream<List<RecurringSchedule>> activeRecurringSchedulesByStudentStream(
   Ref ref,
   String studentId,
 ) {
-  final dataSource = ref.watch(recurringScheduleLocalDataSourceProvider);
-  return dataSource.watchActiveByStudentId(studentId);
+  final repository = ref.watch(recurringScheduleRepositoryProvider);
+  return repository.watchActiveByStudentId(studentId);
 }
 
 /// Controller for recurring schedule operations.
@@ -66,7 +66,7 @@ class RecurringScheduleController extends _$RecurringScheduleController {
     try {
       logInfo('Creating recurring schedule for student $studentId');
 
-      final dataSource = ref.read(recurringScheduleLocalDataSourceProvider);
+      final repository = ref.read(recurringScheduleRepositoryProvider);
 
       final schedule = RecurringSchedule.create(
         id: _uuid.v4(),
@@ -78,7 +78,7 @@ class RecurringScheduleController extends _$RecurringScheduleController {
         isActive: isActive,
       );
 
-      await dataSource.create(schedule);
+      await repository.create(schedule);
 
       logInfo('Created recurring schedule: ${schedule.id}');
 
@@ -104,10 +104,10 @@ class RecurringScheduleController extends _$RecurringScheduleController {
     try {
       logInfo('Updating recurring schedule: $scheduleId');
 
-      final dataSource = ref.read(recurringScheduleLocalDataSourceProvider);
+      final repository = ref.read(recurringScheduleRepositoryProvider);
 
       // Get existing schedule
-      final existing = await dataSource.getById(scheduleId);
+      final existing = await repository.getById(scheduleId);
       if (existing == null) {
         throw Exception('Recurring schedule not found: $scheduleId');
       }
@@ -121,7 +121,7 @@ class RecurringScheduleController extends _$RecurringScheduleController {
         isActive: isActive,
       );
 
-      await dataSource.update(updated);
+      await repository.update(updated);
 
       logInfo('Updated recurring schedule: $scheduleId');
 
@@ -140,14 +140,14 @@ class RecurringScheduleController extends _$RecurringScheduleController {
     try {
       logInfo('Deleting recurring schedule: $scheduleId');
 
-      final dataSource = ref.read(recurringScheduleLocalDataSourceProvider);
+      final repository = ref.read(recurringScheduleRepositoryProvider);
       final generationService = ref.read(sessionGenerationServiceProvider);
 
       // Delete future generated sessions first
       await generationService.deleteFutureSessionsForSchedule(scheduleId);
 
       // Delete the schedule
-      await dataSource.delete(scheduleId);
+      await repository.delete(scheduleId);
 
       logInfo('Deleted recurring schedule: $scheduleId');
     } catch (e, stack) {
@@ -161,17 +161,17 @@ class RecurringScheduleController extends _$RecurringScheduleController {
     try {
       logInfo('Activating recurring schedule: $scheduleId');
 
-      final dataSource = ref.read(recurringScheduleLocalDataSourceProvider);
+      final repository = ref.read(recurringScheduleRepositoryProvider);
 
       // Get existing schedule
-      final existing = await dataSource.getById(scheduleId);
+      final existing = await repository.getById(scheduleId);
       if (existing == null) {
         throw Exception('Recurring schedule not found: $scheduleId');
       }
 
       // Activate
       final activated = existing.activate();
-      await dataSource.update(activated);
+      await repository.update(activated);
 
       logInfo('Activated recurring schedule: $scheduleId');
 
@@ -188,11 +188,11 @@ class RecurringScheduleController extends _$RecurringScheduleController {
     try {
       logInfo('Deactivating recurring schedule: $scheduleId');
 
-      final dataSource = ref.read(recurringScheduleLocalDataSourceProvider);
+      final repository = ref.read(recurringScheduleRepositoryProvider);
       final generationService = ref.read(sessionGenerationServiceProvider);
 
       // Get existing schedule
-      final existing = await dataSource.getById(scheduleId);
+      final existing = await repository.getById(scheduleId);
       if (existing == null) {
         throw Exception('Recurring schedule not found: $scheduleId');
       }
@@ -202,7 +202,7 @@ class RecurringScheduleController extends _$RecurringScheduleController {
 
       // Deactivate
       final deactivated = existing.deactivate();
-      await dataSource.update(deactivated);
+      await repository.update(deactivated);
 
       logInfo('Deactivated recurring schedule: $scheduleId');
     } catch (e, stack) {
@@ -221,11 +221,11 @@ class RecurringScheduleController extends _$RecurringScheduleController {
     try {
       logInfo('Manually generating sessions for schedule: $scheduleId');
 
-      final dataSource = ref.read(recurringScheduleLocalDataSourceProvider);
+      final repository = ref.read(recurringScheduleRepositoryProvider);
       final generationService = ref.read(sessionGenerationServiceProvider);
 
       // Get the schedule
-      final schedule = await dataSource.getById(scheduleId);
+      final schedule = await repository.getById(scheduleId);
       if (schedule == null) {
         throw Exception('Recurring schedule not found: $scheduleId');
       }

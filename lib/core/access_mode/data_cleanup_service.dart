@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/balance/models/data_sources/balance_change_local_data_source.dart';
-import 'package:tutor_zone/features/sessions/models/data_sources/recurring_schedule_local_data_source.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data_sources/recurring_schedule_local_data_source.dart';
 import 'package:tutor_zone/features/sessions/models/data_sources/session_local_data_source.dart';
 import 'package:tutor_zone/features/students/models/data_sources/student_local_data_source.dart';
 

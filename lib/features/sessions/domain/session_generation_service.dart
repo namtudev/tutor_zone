@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/features/balance/domain/allocation_service.dart';
-import 'package:tutor_zone/features/sessions/models/data/recurring_schedule.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data/recurring_schedule.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data_sources/recurring_schedule_local_data_source.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
-import 'package:tutor_zone/features/sessions/models/data_sources/recurring_schedule_local_data_source.dart';
 import 'package:tutor_zone/features/sessions/models/data_sources/session_local_data_source.dart';
 import 'package:uuid/uuid.dart';
 

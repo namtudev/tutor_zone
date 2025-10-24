@@ -3,10 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
-import 'package:tutor_zone/features/sessions/controllers/recurring_schedule_controller.dart';
+import 'package:tutor_zone/features/recurring_schedules/controllers/recurring_schedule_controller.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data/recurring_schedule.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data_sources/recurring_schedule_local_data_source.dart';
 import 'package:tutor_zone/features/sessions/domain/session_generation_service.dart';
-import 'package:tutor_zone/features/sessions/models/data/recurring_schedule.dart';
-import 'package:tutor_zone/features/sessions/models/data_sources/recurring_schedule_local_data_source.dart';
 
 import 'recurring_schedule_controller_test.mocks.dart';
 

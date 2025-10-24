@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
-import 'package:tutor_zone/features/sessions/controllers/recurring_schedule_controller.dart';
+import 'package:tutor_zone/features/recurring_schedules/controllers/recurring_schedule_controller.dart';
 import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
 import 'package:tutor_zone/features/sessions/views/widgets/log_session_dialog.dart';
 import 'package:tutor_zone/features/students/controllers/students_controller.dart';

@@ -3,7 +3,7 @@ import 'package:sembast/sembast.dart';
 
 import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/core/local_storage/sembast_db.dart';
-import 'package:tutor_zone/features/sessions/models/data/recurring_schedule.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data/recurring_schedule.dart';
 
 part 'recurring_schedule_local_data_source.g.dart';
 
@@ -109,6 +109,24 @@ class RecurringScheduleLocalDataSource {
       return records.map((record) => RecurringSchedule.fromJson(record.value)).toList();
     } catch (e, stack) {
       logError('Failed to get active recurring schedules for student: $studentId', e, stack);
+      rethrow;
+    }
+  }
+
+  /// Get inactive recurring schedules
+  Future<List<RecurringSchedule>> getInactive() async {
+    try {
+      final finder = Finder(
+        filter: Filter.equals('isActive', false),
+        sortOrders: [
+          SortOrder('weekday'),
+          SortOrder('startLocal'),
+        ],
+      );
+      final records = await recurringSchedulesStore.find(_db, finder: finder);
+      return records.map((record) => RecurringSchedule.fromJson(record.value)).toList();
+    } catch (e, stack) {
+      logError('Failed to get inactive recurring schedules', e, stack);
       rethrow;
     }
   }

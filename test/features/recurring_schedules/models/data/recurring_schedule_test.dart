@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tutor_zone/features/sessions/models/data/recurring_schedule.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data/recurring_schedule.dart';
 
 void main() {
   group('RecurringSchedule Model Tests', () {

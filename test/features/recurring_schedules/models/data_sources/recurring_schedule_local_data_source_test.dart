@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sembast/sembast_memory.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
-import 'package:tutor_zone/features/sessions/models/data/recurring_schedule.dart';
-import 'package:tutor_zone/features/sessions/models/data_sources/recurring_schedule_local_data_source.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data/recurring_schedule.dart';
+import 'package:tutor_zone/features/recurring_schedules/models/data_sources/recurring_schedule_local_data_source.dart';
 
 void main() {
   group('RecurringScheduleLocalDataSource Tests', () {

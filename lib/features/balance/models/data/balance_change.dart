@@ -8,8 +8,6 @@ part 'balance_change.g.dart';
 /// Stores balance change information including student reference,
 /// amount (positive for payments/prepaid, negative for adjustments),
 /// and timestamp.
-///
-/// Schema: SCHEMA.md - balance_changes store
 @freezed
 abstract class BalanceChange with _$BalanceChange {
   const BalanceChange._();
