@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
+import 'package:tutor_zone/features/sessions/controllers/recurring_schedule_controller.dart';
 import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
+import 'package:tutor_zone/features/sessions/models/data/recurring_schedule.dart';
 import 'package:tutor_zone/features/sessions/views/widgets/log_session_dialog.dart';
 import 'package:tutor_zone/features/students/controllers/students_controller.dart';
 import 'package:tutor_zone/features/students/models/data/student.dart';
@@ -28,24 +31,24 @@ class StudentProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: studentAsync.whenData((student) => Text(student?.name ?? 'Student Profile')).value ??
-            const Text('Student Profile'),
+        title: studentAsync.whenData((student) => Text(student?.name ?? 'Student Profile')).value ?? const Text('Student Profile'),
         actions: [
           studentAsync.whenData((student) {
-            if (student == null) return const SizedBox.shrink();
-            return Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _showEditDialog(context, student),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _confirmDelete(context, ref, student),
-                ),
-              ],
-            );
-          }).value ?? const SizedBox.shrink(),
+                if (student == null) return const SizedBox.shrink();
+                return Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _showEditDialog(context, student),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => _confirmDelete(context, ref, student),
+                    ),
+                  ],
+                );
+              }).value ??
+              const SizedBox.shrink(),
         ],
       ),
       body: studentAsync.when(
@@ -92,8 +95,8 @@ class StudentProfileScreen extends ConsumerWidget {
               Text(
                 error.toString(),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -164,6 +167,7 @@ class _WideLayout extends StatelessWidget {
               children: [
                 _StudentInfoCard(student: student),
                 const SizedBox(height: 16),
+                _RecurringSchedulesCard(studentId: student.id),
               ],
             ),
           ),
@@ -188,6 +192,8 @@ class _NarrowLayout extends StatelessWidget {
         children: [
           _StudentInfoCard(student: student),
           const SizedBox(height: 16),
+          _RecurringSchedulesCard(studentId: student.id),
+          const SizedBox(height: 16),
           _SessionHistoryCard(studentId: student.id),
           const SizedBox(height: 16),
         ],
@@ -206,14 +212,14 @@ class _StudentInfoCard extends StatelessWidget {
     final balanceColor = student.hasNegativeBalance
         ? Theme.of(context).colorScheme.errorContainer
         : student.hasPositiveBalance
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.surfaceContainerHighest;
+        ? Theme.of(context).colorScheme.primaryContainer
+        : Theme.of(context).colorScheme.surfaceContainerHighest;
 
     final balanceTextColor = student.hasNegativeBalance
         ? Theme.of(context).colorScheme.onErrorContainer
         : student.hasPositiveBalance
-            ? Theme.of(context).colorScheme.onPrimaryContainer
-            : Theme.of(context).colorScheme.onSurface;
+        ? Theme.of(context).colorScheme.onPrimaryContainer
+        : Theme.of(context).colorScheme.onSurface;
 
     return Card(
       child: Padding(
@@ -259,11 +265,15 @@ class _StudentInfoCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${student.hasNegativeBalance ? "-" : student.hasPositiveBalance ? "+" : ""}\$${student.balanceDollars.abs().toStringAsFixed(2)}',
+                        '${student.hasNegativeBalance
+                            ? "-"
+                            : student.hasPositiveBalance
+                            ? "+"
+                            : ""}\$${student.balanceDollars.abs().toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: balanceTextColor,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: balanceTextColor,
+                        ),
                       ),
                       Text(
                         student.balanceStatus,
@@ -382,15 +392,15 @@ class _SessionHistoryList extends ConsumerWidget {
                   Text(
                     'No sessions yet',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Click "Add Session" to log your first session',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -432,9 +442,7 @@ class _SessionHistoryList extends ConsumerWidget {
                             color: session.isPaid ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
                           ),
                           label: Text(session.isPaid ? 'Paid' : 'Unpaid'),
-                          backgroundColor: session.isPaid
-                              ? Theme.of(context).colorScheme.primaryContainer
-                              : Theme.of(context).colorScheme.errorContainer,
+                          backgroundColor: session.isPaid ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.errorContainer,
                         ),
                         if (!session.isPaid) ...[
                           const SizedBox(width: 8),
@@ -477,6 +485,189 @@ class _SessionHistoryList extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
         child: Text('Error loading sessions: $error'),
+      ),
+    );
+  }
+}
+
+/// Card showing recurring schedules for a student
+class _RecurringSchedulesCard extends ConsumerWidget {
+  final String studentId;
+
+  const _RecurringSchedulesCard({required this.studentId});
+
+  String _getWeekdayName(int weekday) {
+    const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    return weekdays[weekday - 1];
+  }
+
+  String _formatTime(String timeLocal) {
+    try {
+      final parts = timeLocal.split(':');
+      final hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+      final time = DateTime(2000, 1, 1, hour, minute);
+      return DateFormat.jm().format(time);
+    } catch (e) {
+      return timeLocal;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final schedulesAsync = ref.watch(
+      activeRecurringSchedulesByStudentStreamProvider(studentId),
+    );
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'RECURRING SCHEDULES',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    // TODO: Show add recurring schedule dialog
+                    context.showInfoSnackBar('Add recurring schedule dialog coming soon');
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Schedule'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            schedulesAsync.when(
+              data: (schedules) {
+                if (schedules.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.event_repeat,
+                            size: 48,
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'No recurring schedules',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Add a schedule to auto-generate sessions',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: schedules.map((schedule) {
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8.0),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                          child: Icon(
+                            Icons.event_repeat,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                        title: Text(
+                          _getWeekdayName(schedule.weekday),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${_formatTime(schedule.startLocal)} - ${_formatTime(schedule.endLocal)} • \$${(schedule.rateSnapshotCents / 100).toStringAsFixed(2)}/hr',
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () {
+                                // TODO: Show edit recurring schedule dialog
+                                context.showInfoSnackBar(
+                                  'Edit recurring schedule dialog coming soon',
+                                );
+                              },
+                              tooltip: 'Edit',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () async {
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Delete Schedule'),
+                                    content: Text(
+                                      'Are you sure you want to delete this ${_getWeekdayName(schedule.weekday)} schedule?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      FilledButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (confirmed == true && context.mounted) {
+                                  try {
+                                    await ref.read(recurringScheduleControllerProvider.notifier).deleteSchedule(schedule.id);
+                                    if (context.mounted) {
+                                      context.showSuccessSnackBar('Recurring schedule deleted');
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      context.showErrorSnackBar('Failed to delete schedule: $e');
+                                    }
+                                  }
+                                }
+                              },
+                              tooltip: 'Delete',
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Text('Error loading schedules: $error'),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

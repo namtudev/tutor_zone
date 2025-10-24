@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tutor_zone/core/access_mode/app_access_mode.dart';
+import 'package:tutor_zone/core/access_mode/data_cleanup_service.dart';
+import 'package:tutor_zone/core/debug_log/logger.dart';
 import 'package:tutor_zone/router/route_config.dart';
 
 /// Settings screen for user preferences and configuration
@@ -411,9 +413,20 @@ class SettingsScreen extends ConsumerWidget {
         ),
       );
 
-      // TODO: Clear Sembast DB when switching to cloud
-      // TODO: Clear Firebase cache when switching to local
-      // For now, just switch the mode
+      // Clear data based on mode switch direction
+      final dataCleanupService = ref.read(dataCleanupServiceProvider);
+
+      if (newMode == AppAccessMode.cloud) {
+        // Switching to cloud: clear local Sembast data
+        logInfo('Switching to cloud mode: clearing local data');
+        await dataCleanupService.clearLocalData();
+      } else {
+        // Switching to local: clear Firebase cache and sign out
+        logInfo('Switching to local mode: clearing cloud data');
+        await dataCleanupService.clearCloudData();
+      }
+
+      // Switch the mode
       await ref.read(appAccessModeProvider.notifier).setMode(newMode);
 
       // Close loading dialog

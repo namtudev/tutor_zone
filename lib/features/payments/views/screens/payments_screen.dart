@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:tutor_zone/features/payments/views/widgets/record_payment_dialog.dart';
 import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
+import 'package:tutor_zone/features/sessions/models/data/session.dart';
 import 'package:tutor_zone/features/students/controllers/students_controller.dart';
 
 /// Payments and balances screen showing unpaid sessions and student balances
@@ -81,6 +82,10 @@ class PaymentsScreen extends ConsumerWidget {
             error: (error, stack) => Center(child: Text('Error loading sessions: $error')),
           ),
 
+          const SizedBox(height: 24),
+          Text('UNPAID BY MONTH', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+          const SizedBox(height: 12),
+          const _UnpaidByMonthSummary(),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -394,3 +399,190 @@ class _StudentBalancesList extends ConsumerWidget {
   }
 }
 
+/// Widget showing unpaid sessions grouped by month
+class _UnpaidByMonthSummary extends ConsumerWidget {
+  const _UnpaidByMonthSummary();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unpaidSessionsAsync = ref.watch(unpaidSessionsStreamProvider);
+
+    return unpaidSessionsAsync.when(
+      data: (sessions) {
+        if (sessions.isEmpty) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Center(
+                child: Text(
+                  'No unpaid sessions',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        // Group sessions by month
+        final sessionsByMonth = <String, List<Session>>{};
+        final now = DateTime.now();
+
+        for (final session in sessions) {
+          final sessionDate = DateTime.parse(session.start);
+          final monthKey = DateFormat('yyyy-MM').format(sessionDate);
+          sessionsByMonth.putIfAbsent(monthKey, () => []).add(session);
+        }
+
+        // Sort months in descending order (most recent first)
+        final sortedMonths = sessionsByMonth.keys.toList()
+          ..sort((a, b) => b.compareTo(a));
+
+        // Calculate total until now
+        final totalUntilNow = sessions.fold<int>(
+          0,
+          (sum, session) => sum + session.amountCents,
+        );
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Total until now
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onErrorContainer,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Total Until Now',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.onErrorContainer,
+                                ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '\$${(totalUntilNow / 100).toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onErrorContainer,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // Monthly breakdown
+                ...sortedMonths.map((monthKey) {
+                  final monthSessions = sessionsByMonth[monthKey]!;
+                  final monthTotal = monthSessions.fold<int>(
+                    0,
+                    (sum, session) => sum + session.amountCents,
+                  );
+                  final monthDate = DateTime.parse('$monthKey-01');
+                  final monthLabel = DateFormat('MMMM yyyy').format(monthDate);
+
+                  // Check if this is the current month
+                  final isCurrentMonth = monthKey == DateFormat('yyyy-MM').format(now);
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              isCurrentMonth ? Icons.today : Icons.calendar_month,
+                              size: 16,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              monthLabel,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: isCurrentMonth ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                            ),
+                            if (isCurrentMonth) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Current',
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              '${monthSessions.length} session${monthSessions.length != 1 ? 's' : ''}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              '\$${(monthTotal / 100).toStringAsFixed(2)}',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const Card(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(32.0),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ),
+      error: (error, stack) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text('Error: $error'),
+        ),
+      ),
+    );
+  }
+}
