@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:tutor_zone/core/access_mode/app_access_mode.dart';
 import 'package:tutor_zone/core/access_mode/data_cleanup_service.dart';
+import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
 import 'package:tutor_zone/core/debug_log/logger.dart';
+import 'package:tutor_zone/core/mock_config/fake_data_seeder.dart';
+import 'package:tutor_zone/flavors.dart';
 import 'package:tutor_zone/router/route_config.dart';
 
 /// Settings screen for user preferences and configuration
@@ -288,6 +292,61 @@ class SettingsScreen extends ConsumerWidget {
 
             const SizedBox(height: 32),
 
+            // Developer Options Section (dev mode only)
+            if (F.config.isDev) ...[
+              Text('DEVELOPER OPTIONS', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.science, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Fake Data', style: Theme.of(context).textTheme.titleSmall),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Load sample data for testing and development',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          FilledButton.tonal(
+                            onPressed: () => _loadFakeData(context, ref),
+                            child: const Text('Load Fake Data'),
+                          ),
+                          const SizedBox(width: 12),
+                          OutlinedButton(
+                            onPressed: () => _clearAllData(context, ref),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.error,
+                            ),
+                            child: const Text('Clear All Data'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+
             // Save button
             Align(
               alignment: Alignment.centerRight,
@@ -309,7 +368,9 @@ class SettingsScreen extends ConsumerWidget {
 
   /// Show dialog to confirm mode switch with data loss warning
   void _showModeSwitchDialog(BuildContext context, WidgetRef ref, AppAccessMode newMode) {
-    final currentMode = ref.read(appAccessModeProvider).maybeWhen(
+    final currentMode = ref
+        .read(appAccessModeProvider)
+        .maybeWhen(
           data: (mode) => mode,
           orElse: () => AppAccessMode.local,
         );
@@ -353,8 +414,8 @@ class SettingsScreen extends ConsumerWidget {
                     child: Text(
                       'This action cannot be undone. Make sure to export your data first if needed.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onErrorContainer,
-                          ),
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
                     ),
                   ),
                 ],
@@ -388,8 +449,6 @@ class SettingsScreen extends ConsumerWidget {
     // Capture navigator before async gap
     final navigator = Navigator.of(context);
     final router = GoRouter.of(context);
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final theme = Theme.of(context);
 
     try {
       // Show loading indicator
@@ -440,23 +499,170 @@ class SettingsScreen extends ConsumerWidget {
       }
 
       // Show success message
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('Switched to ${newMode == AppAccessMode.local ? 'Local' : 'Cloud'} mode'),
-          backgroundColor: theme.colorScheme.primary,
-        ),
-      );
+      if (context.mounted) {
+        context.showSuccessSnackBar('Switched to ${newMode == AppAccessMode.local ? 'Local' : 'Cloud'} mode');
+      }
     } catch (e) {
       // Close loading dialog if still open
       navigator.pop();
 
       // Show error message
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('Failed to switch mode: $e'),
-          backgroundColor: theme.colorScheme.error,
+      if (context.mounted) {
+        context.showErrorSnackBar('Failed to switch mode: $e');
+      }
+    }
+  }
+
+  /// Load fake data into database (dev mode only)
+  Future<void> _loadFakeData(BuildContext context, WidgetRef ref) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Load Fake Data'),
+        content: const Text(
+          'This will add sample students, sessions, and payments to your database. '
+          'This action cannot be undone automatically.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Load Data'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    // Capture navigator after async gap
+    final navigator = Navigator.of(context);
+
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Loading fake data...'),
+                ],
+              ),
+            ),
+          ),
         ),
       );
+
+      // Load fake data
+      final seeder = ref.read(fakeDataSeederProvider);
+      await seeder.seedAll();
+
+      // Show success message
+      if (context.mounted) {
+        context.showSuccessSnackBar('Fake data loaded successfully');
+      }
+    } catch (e, stack) {
+      logError('Failed to load fake data', e, stack);
+
+      // Close loading dialog if still open
+      navigator.pop();
+
+      // Show error message
+      if (context.mounted) {
+        context.showErrorSnackBar('Failed to load fake data: $e');
+      }
+    }
+  }
+
+  /// Clear all data from database (dev mode only)
+  Future<void> _clearAllData(BuildContext context, WidgetRef ref) async {
+    // Capture theme early for dialog styling
+    final theme = Theme.of(context);
+
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Clear All Data'),
+        content: const Text(
+          'This will permanently delete all students, sessions, and payments from your local database. '
+          'This action cannot be undone!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: theme.colorScheme.error,
+            ),
+            child: const Text('Delete All'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    // Capture navigator after async gap
+    final navigator = Navigator.of(context);
+
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Clearing all data...'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Clear all data
+      final seeder = ref.read(fakeDataSeederProvider);
+      await seeder.clearAll();
+
+      // Close loading dialog
+      navigator.pop();
+
+      // Show success message
+      if (context.mounted) {
+        context.showSuccessSnackBar('All data cleared successfully');
+      }
+    } catch (e, stack) {
+      logError('Failed to clear data', e, stack);
+
+      // Close loading dialog if still open
+      navigator.pop();
+
+      // Show error message
+      if (context.mounted) {
+        context.showErrorSnackBar('Failed to clear data: $e');
+      }
     }
   }
 }

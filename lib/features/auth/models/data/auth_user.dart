@@ -33,6 +33,5 @@ abstract class AuthUser with _$AuthUser {
   }
 
   /// Creates an [AuthUser] from JSON
-  factory AuthUser.fromJson(Map<String, dynamic> json) =>
-      _$AuthUserFromJson(json);
+  factory AuthUser.fromJson(Map<String, dynamic> json) => _$AuthUserFromJson(json);
 }

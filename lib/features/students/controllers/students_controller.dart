@@ -29,7 +29,6 @@ Stream<List<Student>> studentsWithNegativeBalanceStream(Ref ref) {
   return repository.watchStudentsWithNegativeBalance();
 }
 
-
 /// Controller for managing student operations
 @riverpod
 class StudentsController extends _$StudentsController {

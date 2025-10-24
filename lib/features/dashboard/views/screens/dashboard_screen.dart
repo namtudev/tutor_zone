@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:tutor_zone/core/common_widgets/fixed_height_delegate.dart';
+import 'package:tutor_zone/features/dashboard/controllers/dashboard_controller.dart';
+import 'package:tutor_zone/features/dashboard/models/dashboard_stats.dart';
+import 'package:tutor_zone/features/sessions/models/data/session.dart';
 
 /// Dashboard screen showing overview statistics and today's sessions
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends ConsumerWidget {
   /// Creates a new [DashboardScreen]
   const DashboardScreen({super.key});
 
@@ -10,69 +15,100 @@ class DashboardScreen extends StatelessWidget {
   static const String routeName = 'dashboard';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(dashboardStatsProvider);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 600;
         final crossAxisCount = isWide ? 3 : 1;
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Statistics Cards
-              GridView(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  height: 150,
+        return statsAsync.when(
+          data: (stats) => SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Statistics Cards
+                GridView(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    height: 150,
+                  ),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _StatCard(
+                      title: 'THIS MONTH',
+                      value: '\$${stats.monthIncomeDollars.toStringAsFixed(0)}',
+                      subtitle: '${stats.monthHours.toStringAsFixed(1)} hours',
+                      icon: Icons.attach_money,
+                    ),
+                    _StatCard(
+                      title: 'UNPAID',
+                      value: '\$${stats.unpaidAmountDollars.toStringAsFixed(0)}',
+                      subtitle: '${stats.unpaidSessionCount} sessions',
+                      icon: Icons.warning_amber_outlined,
+                      isWarning: true,
+                    ),
+                    _StatCard(
+                      title: 'THIS WEEK',
+                      value: '${stats.weekHours.toStringAsFixed(1)} hrs',
+                      subtitle: '${stats.weekSessionCount} sessions',
+                      icon: Icons.schedule,
+                    ),
+                  ],
                 ),
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: const [
-                  _StatCard(title: 'THIS MONTH', value: '\$1,240', subtitle: '32 hours', icon: Icons.attach_money),
-                  _StatCard(title: 'UNPAID', value: '\$320', subtitle: '8 sessions', icon: Icons.warning_amber_outlined, isWarning: true),
-                  _StatCard(title: 'THIS WEEK', value: '18.5 hrs', subtitle: '12 sessions', icon: Icons.schedule),
-                ],
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // Quick Actions
-              Text('QUICK ACTIONS', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  _QuickActionButton(icon: Icons.person_add, label: 'Add Student', onPressed: () {}),
-                  _QuickActionButton(icon: Icons.timer, label: 'Start Timer', onPressed: () {}),
-                  _QuickActionButton(icon: Icons.note_add, label: 'Log Session', onPressed: () {}),
-                ],
-              ),
+                // Quick Actions
+                Text('QUICK ACTIONS', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _QuickActionButton(icon: Icons.person_add, label: 'Add Student', onPressed: () {}),
+                    _QuickActionButton(icon: Icons.timer, label: 'Start Timer', onPressed: () {}),
+                    _QuickActionButton(icon: Icons.note_add, label: 'Log Session', onPressed: () {}),
+                  ],
+                ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // Today's Sessions
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("TODAY'S SESSIONS", style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                  TextButton(onPressed: () {}, child: const Text('View All')),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const _SessionsList(),
+                // Today's Sessions
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("TODAY'S SESSIONS", style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    TextButton(onPressed: () {}, child: const Text('View All')),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _SessionsList(sessions: stats.todaySessions),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // Top Students
-              Text('TOP STUDENTS THIS MONTH', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-              const SizedBox(height: 12),
-              const _TopStudentsList(),
-            ],
+                // Top Students
+                Text('TOP STUDENTS THIS MONTH', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                const SizedBox(height: 12),
+                _TopStudentsList(students: stats.topStudents),
+              ],
+            ),
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48),
+                const SizedBox(height: 16),
+                Text('Error loading dashboard: $error'),
+              ],
+            ),
           ),
         );
       },
@@ -134,16 +170,34 @@ class _QuickActionButton extends StatelessWidget {
   }
 }
 
-class _SessionsList extends StatelessWidget {
-  const _SessionsList();
+class _SessionsList extends ConsumerWidget {
+  final List<Session> sessions;
+
+  const _SessionsList({required this.sessions});
 
   @override
-  Widget build(BuildContext context) {
-    final sessions = [
-      _SessionData(time: '2:00 PM', student: 'Sarah Chen', subject: 'Math', duration: '1.5 hrs', status: 'Unpaid', isUnpaid: true),
-      _SessionData(time: '4:00 PM', student: 'Mike Johnson', subject: 'Physics', duration: '2.0 hrs', status: 'Paid', isUnpaid: false),
-      _SessionData(time: '7:00 PM', student: 'Emma Davis', subject: 'Chemistry', duration: '1.0 hr', status: 'Scheduled', isUnpaid: false),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (sessions.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Center(
+            child: Column(
+              children: [
+                Icon(Icons.event_available, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(height: 8),
+                Text(
+                  'No sessions today',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Card(
       child: ListView.separated(
@@ -153,17 +207,33 @@ class _SessionsList extends StatelessWidget {
         separatorBuilder: (context, index) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final session = sessions[index];
+          final startTime = DateTime.parse(session.start);
+          final timeFormat = DateFormat.jm(); // e.g., "2:00 PM"
+
           return ListTile(
             leading: CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              child: Text(session.time, style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onPrimaryContainer)),
+              child: Text(
+                timeFormat.format(startTime),
+                style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onPrimaryContainer),
+              ),
             ),
-            title: Text(session.student),
-            subtitle: Text('${session.subject} • ${session.duration}'),
+            title: Text('Session ${session.id.substring(0, 8)}'), // Show session ID prefix
+            subtitle: Text('${session.durationHours.toStringAsFixed(1)} hrs'),
             trailing: Chip(
-              label: Text(session.status),
-              backgroundColor: session.isUnpaid ? Theme.of(context).colorScheme.errorContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
-              labelStyle: TextStyle(color: session.isUnpaid ? Theme.of(context).colorScheme.onErrorContainer : Theme.of(context).colorScheme.onSurfaceVariant),
+              label: Text(
+                session.isPaid
+                    ? 'Paid'
+                    : session.isFuture
+                    ? 'Scheduled'
+                    : 'Unpaid',
+              ),
+              backgroundColor: session.isUnpaid && !session.isFuture
+                  ? Theme.of(context).colorScheme.errorContainer
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              labelStyle: TextStyle(
+                color: session.isUnpaid && !session.isFuture ? Theme.of(context).colorScheme.onErrorContainer : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           );
         },
@@ -173,15 +243,33 @@ class _SessionsList extends StatelessWidget {
 }
 
 class _TopStudentsList extends StatelessWidget {
-  const _TopStudentsList();
+  final List<StudentStats> students;
+
+  const _TopStudentsList({required this.students});
 
   @override
   Widget build(BuildContext context) {
-    final students = [
-      _StudentData(rank: 1, name: 'Sarah Chen', hours: 12, amount: 480, progress: 0.8),
-      _StudentData(rank: 2, name: 'Mike Johnson', hours: 8, amount: 400, progress: 0.53),
-      _StudentData(rank: 3, name: 'Emma Davis', hours: 6, amount: 240, progress: 0.4),
-    ];
+    if (students.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Center(
+            child: Column(
+              children: [
+                Icon(Icons.people_outline, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(height: 8),
+                Text(
+                  'No student data this month',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Card(
       child: ListView.separated(
@@ -190,17 +278,22 @@ class _TopStudentsList extends StatelessWidget {
         itemCount: students.length,
         separatorBuilder: (context, index) => const Divider(height: 1),
         itemBuilder: (context, index) {
-          final student = students[index];
+          final studentStat = students[index];
+          final rank = index + 1;
+
           return ListTile(
-            leading: CircleAvatar(child: Text('${student.rank}')),
-            title: Text(student.name),
+            leading: CircleAvatar(child: Text('$rank')),
+            title: Text(studentStat.student.name),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 4),
-                LinearProgressIndicator(value: student.progress, backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest),
+                LinearProgressIndicator(
+                  value: studentStat.progress,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                ),
                 const SizedBox(height: 4),
-                Text('${student.hours} hrs • \$${student.amount}'),
+                Text('${studentStat.hours.toStringAsFixed(1)} hrs • \$${studentStat.amountDollars.toStringAsFixed(0)}'),
               ],
             ),
             isThreeLine: true,
@@ -209,25 +302,4 @@ class _TopStudentsList extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SessionData {
-  final String time;
-  final String student;
-  final String subject;
-  final String duration;
-  final String status;
-  final bool isUnpaid;
-
-  _SessionData({required this.time, required this.student, required this.subject, required this.duration, required this.status, required this.isUnpaid});
-}
-
-class _StudentData {
-  final int rank;
-  final String name;
-  final int hours;
-  final int amount;
-  final double progress;
-
-  _StudentData({required this.rank, required this.name, required this.hours, required this.amount, required this.progress});
 }

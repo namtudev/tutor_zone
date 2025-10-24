@@ -32,8 +32,7 @@ abstract class BalanceChange with _$BalanceChange {
   }) = _BalanceChange;
 
   /// Create BalanceChange from JSON
-  factory BalanceChange.fromJson(Map<String, dynamic> json) =>
-      _$BalanceChangeFromJson(json);
+  factory BalanceChange.fromJson(Map<String, dynamic> json) => _$BalanceChangeFromJson(json);
 
   /// Get amount in dollars (for display)
   double get amountDollars => amountCents / 100.0;
@@ -93,4 +92,3 @@ abstract class BalanceChange with _$BalanceChange {
     );
   }
 }
-

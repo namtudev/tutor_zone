@@ -21,7 +21,7 @@ class DbUtils {
 
   /// Delete the database file (for QA resets).
   /// Only works on non-web platforms.
-  /// 
+  ///
   /// Usage:
   /// ```dart
   /// await DbUtils.deleteDatabaseFile();
@@ -96,4 +96,3 @@ class DbUtils {
     logInfo('======================');
   }
 }
-

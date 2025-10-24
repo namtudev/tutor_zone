@@ -457,16 +457,9 @@ class _SessionHistoryList extends ConsumerWidget {
                               if (!context.mounted) return;
 
                               if (result.hasError) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error: ${result.error}'),
-                                    backgroundColor: Theme.of(context).colorScheme.error,
-                                  ),
-                                );
+                                context.showErrorSnackBar('Error: ${result.error}');
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Session marked as paid')),
-                                );
+                                context.showSuccessSnackBar('Session marked as paid');
                               }
                             },
                             child: const Text('Pay'),

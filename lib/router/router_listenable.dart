@@ -68,7 +68,9 @@ class RouterListenable extends _$RouterListenable implements Listenable {
   String? redirect(String location) {
     logDebug('Router redirect check for location: $location');
 
-    final accessMode = ref.read(appAccessModeProvider).maybeWhen(
+    final accessMode = ref
+        .read(appAccessModeProvider)
+        .maybeWhen(
           data: (mode) => mode,
           orElse: () => AppAccessMode.cloud,
         );
@@ -86,8 +88,10 @@ class RouterListenable extends _$RouterListenable implements Listenable {
     final isAuthRoute = _isAuthRoute(location);
     final requiresAuth = _requiresAuth(location);
 
-    logDebug('Location: $location, isAuth: $isAuthenticated, '
-        'isAuthRoute: $isAuthRoute, requiresAuth: $requiresAuth');
+    logDebug(
+      'Location: $location, isAuth: $isAuthenticated, '
+      'isAuthRoute: $isAuthRoute, requiresAuth: $requiresAuth',
+    );
 
     // If user is authenticated and trying to access auth routes, redirect to dashboard
     if (isAuthenticated && isAuthRoute) {
@@ -107,8 +111,7 @@ class RouterListenable extends _$RouterListenable implements Listenable {
 
   /// Check if a route is an authentication route
   bool _isAuthRoute(String location) {
-    return location == Routes.signIn.path ||
-        location == Routes.forgotPassword.path;
+    return location == Routes.signIn.path || location == Routes.forgotPassword.path;
   }
 
   /// Check if a route requires authentication

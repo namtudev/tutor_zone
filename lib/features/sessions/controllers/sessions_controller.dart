@@ -114,9 +114,8 @@ class SessionsController extends _$SessionsController {
       logInfo('Session updated successfully: $id');
 
       // Trigger allocation check if amount changed (due to time or rate change)
-      final amountChanged = start.toIso8601String() != existing.start ||
-          end.toIso8601String() != existing.end ||
-          rateSnapshotCents != existing.rateSnapshotCents;
+      final amountChanged =
+          start.toIso8601String() != existing.start || end.toIso8601String() != existing.end || rateSnapshotCents != existing.rateSnapshotCents;
 
       if (amountChanged) {
         final allocationService = ref.read(allocationServiceProvider);

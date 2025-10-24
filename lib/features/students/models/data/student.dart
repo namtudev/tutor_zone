@@ -4,10 +4,10 @@ part 'student.freezed.dart';
 part 'student.g.dart';
 
 /// Student model representing a tutoring student.
-/// 
+///
 /// Stores student profile information including contact details,
 /// hourly rate, and current balance (in cents).
-/// 
+///
 /// Schema: SCHEMA.md - students store
 @freezed
 abstract class Student with _$Student {
@@ -17,20 +17,20 @@ abstract class Student with _$Student {
   const factory Student({
     /// Unique identifier (UUID)
     required String id,
-    
+
     /// Student's display name
     required String name,
-    
+
     /// Hourly rate in cents (e.g., 4000 = $40.00/hr)
     required int hourlyRateCents,
-    
+
     /// Current balance in cents
     /// Positive = prepaid credit, Negative = amount owed
     required int balanceCents,
-    
+
     /// Timestamp when student was created (ISO8601)
     required String createdAt,
-    
+
     /// Timestamp when student was last updated (ISO8601)
     required String updatedAt,
   }) = _Student;
@@ -96,4 +96,3 @@ abstract class Student with _$Student {
     );
   }
 }
-

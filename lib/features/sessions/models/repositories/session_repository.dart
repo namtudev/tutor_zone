@@ -12,7 +12,7 @@ SessionRepository sessionRepository(Ref ref) {
 }
 
 /// Repository interface for Session operations.
-/// 
+///
 /// Abstracts data source implementation (local Sembast vs. cloud Firestore).
 abstract class SessionRepository {
   /// Create a new session
@@ -99,47 +99,40 @@ class SessionRepositoryLocal implements SessionRepository {
   Future<List<Session>> getAll() => _dataSource.getAll();
 
   @override
-  Future<List<Session>> getByStudentId(String studentId) => 
-      _dataSource.getByStudentId(studentId);
+  Future<List<Session>> getByStudentId(String studentId) => _dataSource.getByStudentId(studentId);
 
   @override
-  Future<List<Session>> getUpcomingSessions() => 
-      _dataSource.getUpcomingSessions();
+  Future<List<Session>> getUpcomingSessions() => _dataSource.getUpcomingSessions();
 
   @override
-  Future<List<Session>> getPastSessions() => 
-      _dataSource.getPastSessions();
+  Future<List<Session>> getPastSessions() => _dataSource.getPastSessions();
 
   @override
-  Future<List<Session>> getUnpaidSessions() => 
-      _dataSource.getUnpaidSessions();
+  Future<List<Session>> getUnpaidSessions() => _dataSource.getUnpaidSessions();
 
   @override
-  Future<List<Session>> getUnpaidSessionsByStudentId(String studentId) => 
-      _dataSource.getUnpaidSessionsByStudentId(studentId);
+  Future<List<Session>> getUnpaidSessionsByStudentId(String studentId) => _dataSource.getUnpaidSessionsByStudentId(studentId);
 
   @override
   Future<List<Session>> getSessionsInRange({
     required DateTime startDate,
     required DateTime endDate,
   }) => _dataSource.getSessionsInRange(
-        startDate: startDate,
-        endDate: endDate,
-      );
+    startDate: startDate,
+    endDate: endDate,
+  );
 
   @override
   Future<Session> update(Session session) => _dataSource.update(session);
 
   @override
-  Future<void> updatePayStatus(String sessionId, String payStatus) => 
-      _dataSource.updatePayStatus(sessionId, payStatus);
+  Future<void> updatePayStatus(String sessionId, String payStatus) => _dataSource.updatePayStatus(sessionId, payStatus);
 
   @override
   Future<void> delete(String id) => _dataSource.delete(id);
 
   @override
-  Future<void> deleteByStudentId(String studentId) => 
-      _dataSource.deleteByStudentId(studentId);
+  Future<void> deleteByStudentId(String studentId) => _dataSource.deleteByStudentId(studentId);
 
   @override
   Future<bool> exists(String id) => _dataSource.exists(id);
@@ -148,8 +141,7 @@ class SessionRepositoryLocal implements SessionRepository {
   Future<int> count() => _dataSource.count();
 
   @override
-  Future<int> countByStudentId(String studentId) => 
-      _dataSource.countByStudentId(studentId);
+  Future<int> countByStudentId(String studentId) => _dataSource.countByStudentId(studentId);
 
   @override
   Stream<List<Session>> watchAll() => _dataSource.watchAll();
@@ -158,15 +150,11 @@ class SessionRepositoryLocal implements SessionRepository {
   Stream<Session?> watchById(String id) => _dataSource.watchById(id);
 
   @override
-  Stream<List<Session>> watchByStudentId(String studentId) => 
-      _dataSource.watchByStudentId(studentId);
+  Stream<List<Session>> watchByStudentId(String studentId) => _dataSource.watchByStudentId(studentId);
 
   @override
-  Stream<List<Session>> watchUpcomingSessions() => 
-      _dataSource.watchUpcomingSessions();
+  Stream<List<Session>> watchUpcomingSessions() => _dataSource.watchUpcomingSessions();
 
   @override
-  Stream<List<Session>> watchUnpaidSessions() => 
-      _dataSource.watchUnpaidSessions();
+  Stream<List<Session>> watchUnpaidSessions() => _dataSource.watchUnpaidSessions();
 }
-

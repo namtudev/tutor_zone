@@ -44,8 +44,7 @@ abstract class RecurringSchedule with _$RecurringSchedule {
   }) = _RecurringSchedule;
 
   /// Create RecurringSchedule from JSON
-  factory RecurringSchedule.fromJson(Map<String, dynamic> json) =>
-      _$RecurringScheduleFromJson(json);
+  factory RecurringSchedule.fromJson(Map<String, dynamic> json) => _$RecurringScheduleFromJson(json);
 
   /// Get rate in dollars (for display)
   double get rateSnapshotDollars => rateSnapshotCents / 100.0;
@@ -232,4 +231,3 @@ abstract class RecurringSchedule with _$RecurringSchedule {
     return sessions;
   }
 }
-

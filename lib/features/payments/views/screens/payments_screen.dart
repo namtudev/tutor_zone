@@ -243,12 +243,24 @@ class _UnpaidSessionsList extends ConsumerWidget {
               },
             );
           },
-          loading: () => const Card(child: Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))),
-          error: (error, stack) => Card(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error'))),
+          loading: () => const Card(
+            child: Center(
+              child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()),
+            ),
+          ),
+          error: (error, stack) => Card(
+            child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error')),
+          ),
         );
       },
-      loading: () => const Card(child: Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))),
-      error: (error, stack) => Card(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error'))),
+      loading: () => const Card(
+        child: Center(
+          child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (error, stack) => Card(
+        child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error')),
+      ),
     );
   }
 }
@@ -389,12 +401,24 @@ class _StudentBalancesList extends ConsumerWidget {
               },
             );
           },
-          loading: () => const Card(child: Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))),
-          error: (error, stack) => Card(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error'))),
+          loading: () => const Card(
+            child: Center(
+              child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()),
+            ),
+          ),
+          error: (error, stack) => Card(
+            child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error')),
+          ),
         );
       },
-      loading: () => const Card(child: Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))),
-      error: (error, stack) => Card(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error'))),
+      loading: () => const Card(
+        child: Center(
+          child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (error, stack) => Card(
+        child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $error')),
+      ),
     );
   }
 }
@@ -417,8 +441,8 @@ class _UnpaidByMonthSummary extends ConsumerWidget {
                 child: Text(
                   'No unpaid sessions',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -436,8 +460,7 @@ class _UnpaidByMonthSummary extends ConsumerWidget {
         }
 
         // Sort months in descending order (most recent first)
-        final sortedMonths = sessionsByMonth.keys.toList()
-          ..sort((a, b) => b.compareTo(a));
+        final sortedMonths = sessionsByMonth.keys.toList()..sort((a, b) => b.compareTo(a));
 
         // Calculate total until now
         final totalUntilNow = sessions.fold<int>(
@@ -472,18 +495,18 @@ class _UnpaidByMonthSummary extends ConsumerWidget {
                           Text(
                             'Total Until Now',
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.onErrorContainer,
-                                ),
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onErrorContainer,
+                            ),
                           ),
                         ],
                       ),
                       Text(
                         '\$${(totalUntilNow / 100).toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onErrorContainer,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
                       ),
                     ],
                   ),
@@ -521,8 +544,8 @@ class _UnpaidByMonthSummary extends ConsumerWidget {
                             Text(
                               monthLabel,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: isCurrentMonth ? FontWeight.bold : FontWeight.normal,
-                                  ),
+                                fontWeight: isCurrentMonth ? FontWeight.bold : FontWeight.normal,
+                              ),
                             ),
                             if (isCurrentMonth) ...[
                               const SizedBox(width: 8),
@@ -535,9 +558,9 @@ class _UnpaidByMonthSummary extends ConsumerWidget {
                                 child: Text(
                                   'Current',
                                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -548,15 +571,15 @@ class _UnpaidByMonthSummary extends ConsumerWidget {
                             Text(
                               '${monthSessions.length} session${monthSessions.length != 1 ? 's' : ''}',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                             ),
                             const SizedBox(width: 16),
                             Text(
                               '\$${(monthTotal / 100).toStringAsFixed(2)}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),

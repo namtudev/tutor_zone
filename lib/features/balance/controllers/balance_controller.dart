@@ -27,8 +27,7 @@ Stream<BalanceChange?> balanceChangeStream(Ref ref, String balanceChangeId) {
 
 /// Stream provider for balance changes by student ID
 @riverpod
-Stream<List<BalanceChange>> balanceChangesByStudentStream(
-    Ref ref, String studentId) {
+Stream<List<BalanceChange>> balanceChangesByStudentStream(Ref ref, String studentId) {
   final repository = ref.watch(balanceChangeRepositoryProvider);
   return repository.watchByStudentId(studentId);
 }
@@ -201,4 +200,3 @@ class BalanceController extends _$BalanceController {
     return await _ledgerRepo.getLedgerForStudentDescending(studentId);
   }
 }
-

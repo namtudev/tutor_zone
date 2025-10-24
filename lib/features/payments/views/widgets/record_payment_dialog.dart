@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
 import 'package:tutor_zone/features/balance/controllers/balance_controller.dart';
 import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
@@ -20,8 +21,7 @@ class RecordPaymentDialog extends ConsumerStatefulWidget {
   final String studentId;
 
   @override
-  ConsumerState<RecordPaymentDialog> createState() =>
-      _RecordPaymentDialogState();
+  ConsumerState<RecordPaymentDialog> createState() => _RecordPaymentDialogState();
 }
 
 class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
@@ -44,8 +44,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
   @override
   Widget build(BuildContext context) {
     final studentAsync = ref.watch(studentStreamProvider(widget.studentId));
-    final sessionsAsync =
-        ref.watch(sessionsByStudentStreamProvider(widget.studentId));
+    final sessionsAsync = ref.watch(sessionsByStudentStreamProvider(widget.studentId));
     return studentAsync.when(
       data: (student) {
         if (student == null) {
@@ -72,9 +71,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
         return sessionsAsync.when(
           data: (sessions) {
             // Filter for unpaid sessions only
-            final unpaidSessions = sessions
-                .where((s) => s.payStatus == PaymentStatus.unpaid)
-                .toList();
+            final unpaidSessions = sessions.where((s) => s.payStatus == PaymentStatus.unpaid).toList();
 
             final totalOwed = unpaidSessions.fold<int>(
               0,
@@ -94,14 +91,10 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                       Container(
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           border: Border(
                             bottom: BorderSide(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .outlineVariant,
+                              color: Theme.of(context).colorScheme.outlineVariant,
                             ),
                           ),
                         ),
@@ -110,16 +103,11 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                           children: [
                             Text(
                               'RECORD PAYMENT',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             IconButton(
                               icon: const Icon(Icons.close),
-                              onPressed: _isSubmitting
-                                  ? null
-                                  : () => Navigator.of(context).pop(),
+                              onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
                             ),
                           ],
                         ),
@@ -135,52 +123,32 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                               // Student info
                               Text(
                                 'Student: ${student.name}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w500),
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
                               ),
                               const SizedBox(height: 8),
                               Container(
                                 padding: const EdgeInsets.all(12.0),
                                 decoration: BoxDecoration(
-                                  color: net < 0
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .errorContainer
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .primaryContainer,
+                                  color: net < 0 ? Theme.of(context).colorScheme.errorContainer : Theme.of(context).colorScheme.primaryContainer,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
                                   children: [
                                     Icon(
                                       Icons.info_outline,
-                                      color: net < 0
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .onErrorContainer
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer,
+                                      color: net < 0 ? Theme.of(context).colorScheme.onErrorContainer : Theme.of(context).colorScheme.onPrimaryContainer,
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Current Balance: \$${student.balanceDollars.toStringAsFixed(2)}',
                                             style: TextStyle(
                                               color: net < 0
-                                                  ? Theme.of(context)
-                                                      .colorScheme
-                                                      .onErrorContainer
-                                                  : Theme.of(context)
-                                                      .colorScheme
-                                                      .onPrimaryContainer,
+                                                  ? Theme.of(context).colorScheme.onErrorContainer
+                                                  : Theme.of(context).colorScheme.onPrimaryContainer,
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -190,24 +158,16 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                                               'Total Owed: \$${(totalOwed / 100).toStringAsFixed(2)}',
                                               style: TextStyle(
                                                 color: net < 0
-                                                    ? Theme.of(context)
-                                                        .colorScheme
-                                                        .onErrorContainer
-                                                    : Theme.of(context)
-                                                        .colorScheme
-                                                        .onPrimaryContainer,
+                                                    ? Theme.of(context).colorScheme.onErrorContainer
+                                                    : Theme.of(context).colorScheme.onPrimaryContainer,
                                               ),
                                             ),
                                             Text(
                                               'Net: ${net < 0 ? "-" : "+"}\$${(net.abs() / 100).toStringAsFixed(2)}',
                                               style: TextStyle(
                                                 color: net < 0
-                                                    ? Theme.of(context)
-                                                        .colorScheme
-                                                        .onErrorContainer
-                                                    : Theme.of(context)
-                                                        .colorScheme
-                                                        .onPrimaryContainer,
+                                                    ? Theme.of(context).colorScheme.onErrorContainer
+                                                    : Theme.of(context).colorScheme.onPrimaryContainer,
                                               ),
                                             ),
                                           ],
@@ -223,10 +183,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                               // Payment Type
                               Text(
                                 'Payment Type',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 12),
                               SegmentedButton<String>(
@@ -255,31 +212,21 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                               // Amount Input
                               Text(
                                 'Amount',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 12),
                               TextFormField(
                                 controller: _amountController,
                                 enabled: !_isSubmitting,
                                 decoration: InputDecoration(
-                                  labelText: _paymentType == 'prepaid'
-                                      ? 'Payment Amount'
-                                      : 'Adjustment Amount',
-                                  hintText: _paymentType == 'prepaid'
-                                      ? 'Enter positive amount'
-                                      : 'Enter amount (+ or -)',
+                                  labelText: _paymentType == 'prepaid' ? 'Payment Amount' : 'Adjustment Amount',
+                                  hintText: _paymentType == 'prepaid' ? 'Enter positive amount' : 'Enter amount (+ or -)',
                                   border: const OutlineInputBorder(),
                                   filled: true,
-                                  fillColor: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
+                                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                                   prefixText: '\$ ',
                                 ),
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
+                                keyboardType: const TextInputType.numberWithOptions(
                                   decimal: true,
                                   signed: true,
                                 ),
@@ -296,8 +243,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                                   if (amount == null) {
                                     return 'Please enter a valid number';
                                   }
-                                  if (_paymentType == 'prepaid' &&
-                                      amount <= 0) {
+                                  if (_paymentType == 'prepaid' && amount <= 0) {
                                     return 'Payment amount must be positive';
                                   }
                                   if (amount == 0) {
@@ -315,15 +261,12 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                                   labelText: 'Payment Date',
                                   border: const OutlineInputBorder(),
                                   filled: true,
-                                  fillColor: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
+                                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                                   suffixIcon: const Icon(Icons.calendar_today),
                                 ),
                                 readOnly: true,
                                 controller: TextEditingController(
-                                  text: DateFormat('MMM d, yyyy')
-                                      .format(_paymentDate),
+                                  text: DateFormat('MMM d, yyyy').format(_paymentDate),
                                 ),
                                 onTap: _isSubmitting
                                     ? null
@@ -332,8 +275,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                                           context: context,
                                           initialDate: _paymentDate,
                                           firstDate: DateTime(2020),
-                                          lastDate: DateTime.now()
-                                              .add(const Duration(days: 365)),
+                                          lastDate: DateTime.now().add(const Duration(days: 365)),
                                         );
                                         if (date != null) {
                                           setState(() {
@@ -358,14 +300,10 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                                 },
                                 dropdownMenuEntries: const [
                                   DropdownMenuEntry(value: 'cash', label: 'Cash'),
-                                  DropdownMenuEntry(
-                                      value: 'check', label: 'Check'),
-                                  DropdownMenuEntry(
-                                      value: 'venmo', label: 'Venmo'),
-                                  DropdownMenuEntry(
-                                      value: 'paypal', label: 'PayPal'),
-                                  DropdownMenuEntry(
-                                      value: 'zelle', label: 'Zelle'),
+                                  DropdownMenuEntry(value: 'check', label: 'Check'),
+                                  DropdownMenuEntry(value: 'venmo', label: 'Venmo'),
+                                  DropdownMenuEntry(value: 'paypal', label: 'PayPal'),
+                                  DropdownMenuEntry(value: 'zelle', label: 'Zelle'),
                                 ],
                               ),
 
@@ -379,9 +317,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                                   labelText: 'Notes (optional)',
                                   border: const OutlineInputBorder(),
                                   filled: true,
-                                  fillColor: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
+                                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                                 ),
                                 maxLines: 2,
                               ),
@@ -394,14 +330,10 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                       Container(
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           border: Border(
                             top: BorderSide(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .outlineVariant,
+                              color: Theme.of(context).colorScheme.outlineVariant,
                             ),
                           ),
                         ),
@@ -409,9 +341,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
-                              onPressed: _isSubmitting
-                                  ? null
-                                  : () => Navigator.of(context).pop(),
+                              onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
                               child: const Text('Cancel'),
                             ),
                             const SizedBox(width: 12),
@@ -522,15 +452,8 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _paymentType == 'prepaid'
-                  ? 'Payment recorded successfully'
-                  : 'Adjustment recorded successfully',
-            ),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
+        context.showSuccessSnackBar(
+          _paymentType == 'prepaid' ? 'Payment recorded successfully' : 'Adjustment recorded successfully',
         );
       }
     } catch (e) {
@@ -538,12 +461,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
         setState(() {
           _isSubmitting = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     }
   }

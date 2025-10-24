@@ -74,7 +74,7 @@ class StudentLocalDataSource {
 
       final allStudents = await getAllSorted();
       final lowerQuery = query.toLowerCase();
-      
+
       return allStudents.where((student) {
         return student.name.toLowerCase().contains(lowerQuery);
       }).toList();
@@ -118,7 +118,7 @@ class StudentLocalDataSource {
   Future<Student> update(Student student) async {
     try {
       logInfo('Updating student: ${student.id}');
-      
+
       // Verify student exists
       final exists = await studentsStore.record(student.id).exists(_db);
       if (!exists) {
@@ -137,7 +137,7 @@ class StudentLocalDataSource {
   Future<void> updateBalance(String studentId, int newBalanceCents) async {
     try {
       logInfo('Updating balance for student $studentId: $newBalanceCents cents');
-      
+
       await studentsStore.record(studentId).update(_db, {
         'balanceCents': newBalanceCents,
         'updatedAt': DateTime.now().toIso8601String(),
@@ -218,4 +218,3 @@ class StudentLocalDataSource {
     }
   }
 }
-

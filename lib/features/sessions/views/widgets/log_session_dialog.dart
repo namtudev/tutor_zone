@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:tutor_zone/core/common_widgets/app_snackbar.dart';
 import 'package:tutor_zone/features/sessions/controllers/sessions_controller.dart';
 import 'package:tutor_zone/features/sessions/models/data/session.dart';
 import 'package:tutor_zone/features/students/controllers/students_controller.dart';
@@ -352,9 +354,7 @@ class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
     final startMinutes = _startTime!.hour * 60 + _startTime!.minute;
     final endMinutes = _endTime!.hour * 60 + _endTime!.minute;
     if (endMinutes <= startMinutes) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('End time must be after start time')),
-      );
+      context.showErrorSnackBar('End time must be after start time');
       return;
     }
 
@@ -400,17 +400,10 @@ class _LogSessionDialogState extends ConsumerState<LogSessionDialog> {
     if (!mounted) return;
 
     if (result.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${result.error}'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      context.showErrorSnackBar('Error: ${result.error}');
     } else {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Session logged successfully')),
-      );
+      context.showSuccessSnackBar('Session logged successfully');
     }
   }
 }

@@ -93,12 +93,10 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          _searchQuery.isEmpty
-                              ? 'Add your first student to get started'
-                              : 'Try a different search term',
+                          _searchQuery.isEmpty ? 'Add your first student to get started' : 'Try a different search term',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
@@ -128,8 +126,8 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
                     Text(
                       error.toString(),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -140,26 +138,27 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
 
           // Footer
           studentsAsync.whenData((students) {
-            final filteredCount = _searchQuery.isEmpty
-                ? students.length
-                : students.where((s) {
-                    return s.name.toLowerCase().contains(_searchQuery);
-                  }).length;
+                final filteredCount = _searchQuery.isEmpty
+                    ? students.length
+                    : students.where((s) {
+                        return s.name.toLowerCase().contains(_searchQuery);
+                      }).length;
 
-            return Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
-              ),
-              child: Text(
-                'Showing $filteredCount of ${students.length} students',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                return Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+                  ),
+                  child: Text(
+                    'Showing $filteredCount of ${students.length} students',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-              ),
-            );
-          }).value ?? const SizedBox.shrink(),
+                  ),
+                );
+              }).value ??
+              const SizedBox.shrink(),
         ],
       ),
     );
@@ -215,8 +214,8 @@ class _StudentsTable extends StatelessWidget {
                           color: student.hasNegativeBalance
                               ? Theme.of(context).colorScheme.error
                               : student.hasPositiveBalance
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.onSurface,
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -224,8 +223,8 @@ class _StudentsTable extends StatelessWidget {
                       Text(
                         student.balanceStatus,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -285,8 +284,8 @@ class _StudentsCardList extends StatelessWidget {
                         color: student.hasNegativeBalance
                             ? Theme.of(context).colorScheme.error
                             : student.hasPositiveBalance
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.onSurface,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

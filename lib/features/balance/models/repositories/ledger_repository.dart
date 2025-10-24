@@ -48,34 +48,33 @@ sealed class LedgerEntry with _$LedgerEntry {
 
   /// Get the timestamp for sorting
   DateTime get entryTimestamp => switch (this) {
-        SessionEntry(:final timestamp) => timestamp,
-        BalanceChangeEntry(:final timestamp) => timestamp,
-      };
+    SessionEntry(:final timestamp) => timestamp,
+    BalanceChangeEntry(:final timestamp) => timestamp,
+  };
 
   /// Get the amount for this entry
   int get entryAmount => switch (this) {
-        SessionEntry(:final amountCents) => amountCents,
-        BalanceChangeEntry(:final amountCents) => amountCents,
-      };
+    SessionEntry(:final amountCents) => amountCents,
+    BalanceChangeEntry(:final amountCents) => amountCents,
+  };
 
   /// Get the running balance
   int get runningBalance => switch (this) {
-        SessionEntry(:final runningBalanceCents) => runningBalanceCents,
-        BalanceChangeEntry(:final runningBalanceCents) => runningBalanceCents,
-      };
+    SessionEntry(:final runningBalanceCents) => runningBalanceCents,
+    BalanceChangeEntry(:final runningBalanceCents) => runningBalanceCents,
+  };
 
   /// Get entry type
   LedgerEntryType get entryType => switch (this) {
-        SessionEntry() => LedgerEntryType.session,
-        BalanceChangeEntry() => LedgerEntryType.balanceChange,
-      };
+    SessionEntry() => LedgerEntryType.session,
+    BalanceChangeEntry() => LedgerEntryType.balanceChange,
+  };
 
   /// Get display description
   String get description => switch (this) {
-        SessionEntry(:final session) =>
-          'Session: ${session.durationHours.toStringAsFixed(1)}h',
-        BalanceChangeEntry(:final balanceChange) => balanceChange.changeType,
-      };
+    SessionEntry(:final session) => 'Session: ${session.durationHours.toStringAsFixed(1)}h',
+    BalanceChangeEntry(:final balanceChange) => balanceChange.changeType,
+  };
 }
 
 /// Repository for combining sessions and balance changes into a ledger view
@@ -90,8 +89,7 @@ class LedgerRepository {
   Future<List<LedgerEntry>> getLedgerForStudent(String studentId) async {
     // Fetch sessions and balance changes
     final sessions = await _sessionRepo.getByStudentId(studentId);
-    final balanceChanges =
-        await _balanceChangeRepo.getByStudentIdAscending(studentId);
+    final balanceChanges = await _balanceChangeRepo.getByStudentIdAscending(studentId);
 
     // Combine and sort by timestamp
     final entries = <LedgerEntry>[];
@@ -100,8 +98,7 @@ class LedgerRepository {
     // Create a combined list with timestamps
     final allItems = <({DateTime timestamp, dynamic item})>[
       ...sessions.map((s) => (timestamp: DateTime.parse(s.start), item: s)),
-      ...balanceChanges
-          .map((bc) => (timestamp: DateTime.parse(bc.createdAt), item: bc)),
+      ...balanceChanges.map((bc) => (timestamp: DateTime.parse(bc.createdAt), item: bc)),
     ];
 
     // Sort by timestamp (oldest first)
@@ -113,22 +110,26 @@ class LedgerRepository {
         final session = item.item as Session;
         // Sessions reduce balance (negative impact)
         runningBalance -= session.amountCents;
-        entries.add(LedgerEntry.session(
-          session: session,
-          timestamp: item.timestamp,
-          amountCents: -session.amountCents, // Negative for debit
-          runningBalanceCents: runningBalance,
-        ));
+        entries.add(
+          LedgerEntry.session(
+            session: session,
+            timestamp: item.timestamp,
+            amountCents: -session.amountCents, // Negative for debit
+            runningBalanceCents: runningBalance,
+          ),
+        );
       } else if (item.item is BalanceChange) {
         final balanceChange = item.item as BalanceChange;
         // Balance changes add to balance (positive impact)
         runningBalance += balanceChange.amountCents;
-        entries.add(LedgerEntry.balanceChange(
-          balanceChange: balanceChange,
-          timestamp: item.timestamp,
-          amountCents: balanceChange.amountCents,
-          runningBalanceCents: runningBalance,
-        ));
+        entries.add(
+          LedgerEntry.balanceChange(
+            balanceChange: balanceChange,
+            timestamp: item.timestamp,
+            amountCents: balanceChange.amountCents,
+            runningBalanceCents: runningBalance,
+          ),
+        );
       }
     }
 
@@ -136,8 +137,7 @@ class LedgerRepository {
   }
 
   /// Get ledger entries for a student (reverse chronological order, most recent first)
-  Future<List<LedgerEntry>> getLedgerForStudentDescending(
-      String studentId) async {
+  Future<List<LedgerEntry>> getLedgerForStudentDescending(String studentId) async {
     final entries = await getLedgerForStudent(studentId);
     return entries.reversed.toList();
   }
@@ -151,8 +151,7 @@ class LedgerRepository {
 
   /// Get unpaid sessions total for a student
   Future<int> getUnpaidTotal(String studentId) async {
-    final unpaidSessions =
-        await _sessionRepo.getUnpaidSessionsByStudentId(studentId);
+    final unpaidSessions = await _sessionRepo.getUnpaidSessionsByStudentId(studentId);
     return unpaidSessions.fold<int>(
       0,
       (sum, session) => sum + session.amountCents,
@@ -173,4 +172,3 @@ class LedgerRepository {
     }
   }
 }
-

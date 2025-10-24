@@ -14,7 +14,7 @@ StudentRepository studentRepository(Ref ref) {
 }
 
 /// Abstract repository interface for student operations.
-/// 
+///
 /// Provides a consistent API regardless of data source (local Sembast or cloud Firestore).
 abstract class StudentRepository {
   /// Create a new student
@@ -87,19 +87,16 @@ class StudentRepositoryLocal implements StudentRepository {
   Future<List<Student>> searchByName(String query) => _dataSource.searchByName(query);
 
   @override
-  Future<List<Student>> getStudentsWithNegativeBalance() => 
-      _dataSource.getStudentsWithNegativeBalance();
+  Future<List<Student>> getStudentsWithNegativeBalance() => _dataSource.getStudentsWithNegativeBalance();
 
   @override
-  Future<List<Student>> getStudentsWithPositiveBalance() => 
-      _dataSource.getStudentsWithPositiveBalance();
+  Future<List<Student>> getStudentsWithPositiveBalance() => _dataSource.getStudentsWithPositiveBalance();
 
   @override
   Future<Student> update(Student student) => _dataSource.update(student);
 
   @override
-  Future<void> updateBalance(String studentId, int newBalanceCents) => 
-      _dataSource.updateBalance(studentId, newBalanceCents);
+  Future<void> updateBalance(String studentId, int newBalanceCents) => _dataSource.updateBalance(studentId, newBalanceCents);
 
   @override
   Future<void> delete(String id) async {
@@ -125,8 +122,7 @@ class StudentRepositoryLocal implements StudentRepository {
   Stream<Student?> watchById(String id) => _dataSource.watchById(id);
 
   @override
-  Stream<List<Student>> watchStudentsWithNegativeBalance() => 
-      _dataSource.watchStudentsWithNegativeBalance();
+  Stream<List<Student>> watchStudentsWithNegativeBalance() => _dataSource.watchStudentsWithNegativeBalance();
 }
 
 /// Cloud implementation using Firestore (Phase 2)
@@ -206,4 +202,3 @@ class StudentRepositoryCloud implements StudentRepository {
     throw UnimplementedError('Cloud mode not implemented in Phase 1');
   }
 }
-

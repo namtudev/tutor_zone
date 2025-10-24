@@ -66,8 +66,7 @@ class BalanceChangeRepositoryLocal implements BalanceChangeRepository {
   BalanceChangeRepositoryLocal(this._dataSource);
 
   @override
-  Future<BalanceChange> create(BalanceChange balanceChange) =>
-      _dataSource.create(balanceChange);
+  Future<BalanceChange> create(BalanceChange balanceChange) => _dataSource.create(balanceChange);
 
   @override
   Future<BalanceChange?> getById(String id) => _dataSource.getById(id);
@@ -76,23 +75,19 @@ class BalanceChangeRepositoryLocal implements BalanceChangeRepository {
   Future<List<BalanceChange>> getAll() => _dataSource.getAll();
 
   @override
-  Future<List<BalanceChange>> getByStudentId(String studentId) =>
-      _dataSource.getByStudentId(studentId);
+  Future<List<BalanceChange>> getByStudentId(String studentId) => _dataSource.getByStudentId(studentId);
 
   @override
-  Future<List<BalanceChange>> getByStudentIdAscending(String studentId) =>
-      _dataSource.getByStudentIdAscending(studentId);
+  Future<List<BalanceChange>> getByStudentIdAscending(String studentId) => _dataSource.getByStudentIdAscending(studentId);
 
   @override
-  Future<int> getTotalAmountByStudentId(String studentId) =>
-      _dataSource.getTotalAmountByStudentId(studentId);
+  Future<int> getTotalAmountByStudentId(String studentId) => _dataSource.getTotalAmountByStudentId(studentId);
 
   @override
   Future<void> delete(String id) => _dataSource.delete(id);
 
   @override
-  Future<void> deleteByStudentId(String studentId) =>
-      _dataSource.deleteByStudentId(studentId);
+  Future<void> deleteByStudentId(String studentId) => _dataSource.deleteByStudentId(studentId);
 
   @override
   Future<bool> exists(String id) => _dataSource.exists(id);
@@ -101,8 +96,7 @@ class BalanceChangeRepositoryLocal implements BalanceChangeRepository {
   Future<int> count() => _dataSource.count();
 
   @override
-  Future<int> countByStudentId(String studentId) =>
-      _dataSource.countByStudentId(studentId);
+  Future<int> countByStudentId(String studentId) => _dataSource.countByStudentId(studentId);
 
   @override
   Stream<List<BalanceChange>> watchAll() => _dataSource.watchAll();
@@ -111,8 +105,7 @@ class BalanceChangeRepositoryLocal implements BalanceChangeRepository {
   Stream<BalanceChange?> watchById(String id) => _dataSource.watchById(id);
 
   @override
-  Stream<List<BalanceChange>> watchByStudentId(String studentId) =>
-      _dataSource.watchByStudentId(studentId);
+  Stream<List<BalanceChange>> watchByStudentId(String studentId) => _dataSource.watchByStudentId(studentId);
 }
 
 /// Cloud implementation (Phase 2)
@@ -187,4 +180,3 @@ class BalanceChangeRepositoryCloud implements BalanceChangeRepository {
     throw UnimplementedError('Cloud mode not implemented in Phase 1');
   }
 }
-
